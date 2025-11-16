@@ -1,0 +1,15 @@
+# This .gitignore prevents the _ai directory from being committed
+# when this repo is cloned into other projects
+
+# Ignore everything in parent directory (when used as _ai in projects)
+../*
+!../.gitignore
+
+# Keep the ai-toolkit repo files tracked when working in this repo itself
+!.git/
+!.gitignore
+!README.md
+!prompts/
+!agents/
+!templates/
+!workflows/
