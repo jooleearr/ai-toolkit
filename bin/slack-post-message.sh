@@ -24,6 +24,7 @@ Options:
   --pr-url URL        Include PR link in formatted message
   --ticket TICKET     Include Jira ticket reference
   --channel CHANNEL   Override default channel (e.g., "engineering")
+  --check-existing    Check for existing bot messages about this PR/ticket
   -h, --help         Show this help message
 
 Examples:
@@ -43,6 +44,12 @@ Examples:
   slack-post-message.sh "Urgent fix deployed" \
     --channel "incidents"
 
+  # Check for existing bot messages before posting
+  slack-post-message.sh "PR ready for review" \
+    --pr-url "https://github.com/org/repo/pull/123" \
+    --ticket "PROJ-456" \
+    --check-existing
+
 Tips:
   - Channel names should be without # prefix (e.g., "engineering")
   - Messages support basic Slack markdown (*, _, ~, `, ```)
@@ -54,6 +61,69 @@ EOF
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
+# Check if a message about this PR/ticket already exists in the channel
+check_existing_message() {
+  local channel="$1"
+  local pr_url="$2"
+  local ticket_key="$3"
+  local auth_header="$4"
+
+  debug "Checking for existing messages in #$channel"
+
+  # Get messages from the last 30 minutes
+  local oldest_timestamp
+  oldest_timestamp=$(date -u -v-30M +%s 2>/dev/null || date -u -d '30 minutes ago' +%s 2>/dev/null)
+
+  local slack_url="https://slack.com/api/conversations.history"
+  local query="channel=${channel}&oldest=${oldest_timestamp}&limit=100"
+
+  local response
+  if ! response=$(http_request "GET" "${slack_url}?${query}" "$auth_header"); then
+    warn_msg "Could not fetch channel history, will post message anyway"
+    return 1
+  fi
+
+  local ok
+  ok=$(echo "$response" | jq -r '.ok')
+
+  if [[ "$ok" != "true" ]]; then
+    warn_msg "Could not fetch channel history, will post message anyway"
+    return 1
+  fi
+
+  # Extract PR number from URL if provided
+  local pr_number=""
+  if [[ -n "$pr_url" ]]; then
+    pr_number=$(echo "$pr_url" | grep -oE '/pull/[0-9]+' | grep -oE '[0-9]+')
+  fi
+
+  # Check messages for PR URL or ticket key mentions
+  local found=false
+  while IFS= read -r message; do
+    local bot_id
+    local text
+
+    bot_id=$(echo "$message" | jq -r '.bot_id // empty')
+    text=$(echo "$message" | jq -r '.text // ""')
+
+    # Only check messages from bots/integrations
+    if [[ -n "$bot_id" ]]; then
+      # Check if message mentions the PR number or ticket
+      if [[ -n "$pr_number" && "$text" =~ $pr_number ]] || \
+         [[ -n "$ticket_key" && "$text" =~ $ticket_key ]]; then
+        found=true
+        break
+      fi
+    fi
+  done < <(echo "$response" | jq -c '.messages[]?')
+
+  if [[ "$found" == "true" ]]; then
+    return 0  # Existing message found
+  else
+    return 1  # No existing message found
+  fi
+}
 
 # Build Slack Block Kit message
 build_message_blocks() {
@@ -133,6 +203,7 @@ main() {
   local pr_url=""
   local ticket_key=""
   local channel=""
+  local check_existing=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -159,6 +230,10 @@ main() {
         fi
         channel="$2"
         shift 2
+        ;;
+      --check-existing)
+        check_existing=true
+        shift 1
         ;;
       *)
         error_msg "Unknown option: $1"
@@ -193,6 +268,22 @@ main() {
 
   debug "Posting to Slack channel: $channel"
 
+  # Get auth header
+  local auth_header
+  if ! auth_header=$(slack_auth_header); then
+    exit 1
+  fi
+
+  # Check for existing messages if requested
+  if [[ "$check_existing" == true ]]; then
+    if check_existing_message "$channel" "$pr_url" "$ticket_key" "$auth_header"; then
+      info_msg "Existing bot message found in #$channel about this PR/ticket"
+      info_msg "Skipping duplicate notification"
+      exit 0
+    fi
+    debug "No existing message found, will post notification"
+  fi
+
   # Build message blocks
   local blocks
   if ! blocks=$(build_message_blocks "$message" "$pr_url" "$ticket_key"); then
@@ -213,12 +304,6 @@ main() {
     }')
 
   debug "Payload: $payload"
-
-  # Get auth header
-  local auth_header
-  if ! auth_header=$(slack_auth_header); then
-    exit 1
-  fi
 
   # Post to Slack
   local slack_url="https://slack.com/api/chat.postMessage"

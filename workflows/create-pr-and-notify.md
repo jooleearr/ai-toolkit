@@ -73,32 +73,43 @@ Capture the PR URL from the output.
 
 **Alternative**: If `gh` CLI is not available, guide user to create PR manually via GitHub UI and ask for PR URL.
 
-### 4. Update Jira Status
+### 4. Update Jira Blocked Reasons
 
-Set the ticket's "Blocked Reasons" field to indicate it's waiting for code review:
+Set the ticket's "Blocked Reasons" field to indicate it's waiting for code review, while keeping it in "In Progress" status:
 
 ```bash
-jira-update-status.sh {{TICKET_KEY}} "Ready" --blocked "Internal - Code Review"
+jira-update-status.sh {{TICKET_KEY}} "In Progress" --blocked "Internal - Code Review"
 ```
 
-**Note**: The target status might be "Ready", "In Review", or remain "In Progress" depending on the workflow. Use the appropriate status for this Jira instance.
+**Important**: Keep the ticket in "In Progress" status when setting blocked reasons. The ticket should remain "In Progress" until the PR is merged, at which point it will be closed. If the jira-update-status.sh script indicates the ticket is already in the target status, that's expected - the blocked reason field will still be updated.
 
 ### 5. Notify Team on Slack
 
-Post a formatted message to the team's Slack channel:
+Check if GitHub has already posted a PR notification to Slack, then post if needed:
 
 ```bash
 slack-post-message.sh "PR ready for review: {{PR_TITLE}}" \
   --pr-url "{{PR_URL}}" \
-  --ticket "{{TICKET_KEY}}"
+  --ticket "{{TICKET_KEY}}" \
+  --check-existing
 ```
+
+The `--check-existing` flag will:
+- Fetch recent messages from the Slack channel (last 30 minutes)
+- Check if any bot/integration has already posted about this PR or ticket
+- Skip posting if an automated message already exists
+- Post the message if no existing notification is found
+
+**Note**: This prevents duplicate notifications in repositories with GitHub-Slack integrations.
 
 ### 6. Confirm Completion
 
 Inform the user:
 - PR #{{PR_NUMBER}} has been created: {{PR_URL}}
-- Jira ticket {{TICKET_KEY}} marked as blocked on code review
-- Team notified in #{{SLACK_CHANNEL}}
+- Jira ticket {{TICKET_KEY}} remains in "In Progress" and marked as blocked on code review
+- Team notification status:
+  - If new message posted: "Team notified in #{{SLACK_CHANNEL}}"
+  - If existing message found: "Existing GitHub notification found in #{{SLACK_CHANNEL}}, skipped duplicate"
 
 Suggest next steps:
 - Monitor PR for review comments
@@ -117,9 +128,9 @@ Suggest next steps:
 5. On confirmation:
    - Runs: `gh pr create` with ticket reference
    - Captures PR URL: https://github.com/org/repo/pull/789
-   - Runs: `jira-update-status.sh PROJ-456 "Ready" --blocked "Internal - Code Review"`
-   - Runs: `slack-post-message.sh "PR ready for review: Add user authentication" --pr-url "..." --ticket "PROJ-456"`
-6. Confirms: "PR #789 created and team notified in #engineering"
+   - Runs: `jira-update-status.sh PROJ-456 "In Progress" --blocked "Internal - Code Review"`
+   - Runs: `slack-post-message.sh "PR ready for review: Add user authentication" --pr-url "..." --ticket "PROJ-456" --check-existing`
+6. Confirms: "PR #789 created, ticket blocked on code review, and team notified in #engineering" (or "PR #789 created, existing notification found in Slack")
 
 ## Customisation
 
