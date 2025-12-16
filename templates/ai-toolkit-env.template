@@ -1,0 +1,64 @@
+# AI Toolkit Integration Configuration
+# Copy this file to ~/.ai-toolkit-env and fill in your credentials
+# Usage: cp templates/ai-toolkit-env.template ~/.ai-toolkit-env
+# Then edit ~/.ai-toolkit-env with your actual values
+
+# ============================================================================
+# JIRA CONFIGURATION
+# ============================================================================
+
+# Your Jira instance URL (without trailing slash)
+export JIRA_BASE_URL="https://your-company.atlassian.net"
+
+# Your Jira email address
+export JIRA_EMAIL="your-email@company.com"
+
+# Jira API token (create at: Account Settings → Security → API Tokens)
+export JIRA_TOKEN="your-jira-api-token"
+
+# Jira Custom Field IDs
+# Use jira-find-fields.sh to discover these for your Jira instance
+# Example: jira-find-fields.sh "acceptance" to find acceptance criteria field
+export JIRA_FIELD_ACCEPTANCE_CRITERIA="customfield_10000"
+export JIRA_FIELD_BLOCKED_REASONS="customfield_10001"
+
+# ============================================================================
+# GITHUB CONFIGURATION
+# ============================================================================
+
+# GitHub Personal Access Token
+# Create at: Settings → Developer Settings → Personal Access Tokens
+# Required scopes: repo, read:org
+export GITHUB_TOKEN="ghp_your-github-token"
+
+# Default GitHub repository owner (username or organisation)
+export GITHUB_REPO_OWNER="your-github-username"
+
+# Default GitHub repository name
+export GITHUB_REPO_NAME="your-repo-name"
+
+# ============================================================================
+# SLACK CONFIGURATION
+# ============================================================================
+
+# Slack Bot Token (starts with xoxb-)
+# Create at: https://api.slack.com/apps
+# Required scopes: chat:write, channels:read
+export SLACK_TOKEN="xoxb-your-slack-bot-token"
+
+# Default Slack channel for notifications (without # prefix)
+export SLACK_CHANNEL="engineering"
+
+# Optional: Your Slack user ID for mentions (e.g., "U12345678")
+# Find with: https://api.slack.com/methods/users.list/test
+export SLACK_USER_ID=""
+
+# ============================================================================
+# BEHAVIOUR OPTIONS
+# ============================================================================
+
+# Default blocked reason when PR is ready for review
+export JIRA_BLOCKED_REASON="Internal - Code Review"
+
+# Enable debug output (set to "true" for verbose logging)
+export DEBUG_MODE="false"

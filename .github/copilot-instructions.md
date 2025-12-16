@@ -20,6 +20,7 @@ ai-toolkit/
 ├── README.md                       # Main documentation
 ├── prompts/                        # Reusable prompt templates
 ├── agents/                         # Custom agent configurations
+├── chatmodes/                      # Chat mode configurations
 ├── templates/                      # Code and documentation templates
 └── workflows/                      # Common AI-assisted workflows
 ```

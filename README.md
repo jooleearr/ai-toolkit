@@ -38,6 +38,7 @@ Organize your resources by type:
 📂 ai-toolkit/
 ├── 💬 prompts/     - Reusable prompt templates
 ├── 🤖 agents/      - Custom agent configurations
+├── 💭 chatmodes/   - Chat mode configurations
 ├── 📄 templates/   - Code and documentation templates
 └── 🔁 workflows/   - Common AI-assisted workflows
 ```
