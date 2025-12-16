@@ -45,7 +45,12 @@ Use kebab-case for filenames (e.g., `technical-planning.md`, `accessibility.chat
 
 ### The .gitignore
 
-The `.gitignore` is specifically designed to prevent this repo from polluting parent projects when cloned as `_ai/`. It ignores everything in the parent directory except itself. Be extremely careful when modifying it.
+The `.gitignore` file handles standard ignores for this repository (macOS files, editor configs, etc.).
+
+**Important**: When installing this repo as `_ai/` in another project, use the `install-to-project.sh` script to automatically add `_ai/` to the parent project's `.gitignore`:
+```bash
+./install-to-project.sh /path/to/target/project
+```
 
 ## Existing Resources
 

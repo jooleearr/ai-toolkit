@@ -50,6 +50,7 @@ The `.gitignore` is specifically designed to prevent the `_ai` directory from be
 - Use conventional commits format: `type(scope): description`
 - Common types: `feat`, `docs`, `chore`, `fix`
 - Example: `feat(prompts): add code review template`
+- **Do not include** "Generated with Claude Code" or "Co-Authored-By: Claude" attribution in commit messages
 
 ## Common Tasks
 

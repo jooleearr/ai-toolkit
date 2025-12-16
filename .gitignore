@@ -1,16 +1,24 @@
-# This .gitignore prevents the _ai directory from being committed
-# when this repo is cloned into other projects
+# AI Toolkit - .gitignore for this repository
 
-# Ignore everything in parent directory (when used as _ai in projects)
-../*
-!../.gitignore
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Keep the ai-toolkit repo files tracked when working in this repo itself
-!.git/
-!.gitignore
-!README.md
-!prompts/
-!agents/
-!chatmodes/
-!templates/
-!workflows/
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.log
+*.tmp
+
+# Don't commit credentials file (just in case)
+.ai-toolkit-env
+
+# Note: When cloning this repo as _ai/ into other projects,
+# you need to add _ai/ to the parent project's .gitignore
+# See README.md for setup instructions
