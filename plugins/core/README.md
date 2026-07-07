@@ -7,6 +7,13 @@ Core reusable skills that apply to any project.
 | Skill | Invoke | Purpose |
 | :---- | :----- | :------ |
 | `docs-scaffold` | `/core:docs-scaffold` (or model-invoked) | Scaffold a standardised `docs/` structure with architecture, ADRs, and a runbook. |
+| `writing-great-skills` | `/core:writing-great-skills` (user-invoked) | Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable. Use it when authoring the toolkit's own skills. Discloses its glossary to a sibling `GLOSSARY.md`. |
+
+### Attribution
+
+`writing-great-skills` (and its `GLOSSARY.md`) is copied from Matt Pocock's skills
+collection: <https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-great-skills>.
+Kept verbatim; credit and thanks to the author.
 
 ## Adding a skill to this plugin
 
