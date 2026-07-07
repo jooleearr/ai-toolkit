@@ -1,24 +1,13 @@
-# AI Toolkit - .gitignore for this repository
-
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
 
-# Editor files
-.vscode/
+# Editor / IDE
 .idea/
+.vscode/
 *.swp
-*.swo
-*~
 
-# Temporary files
-*.log
-*.tmp
+# Local settings backups produced by install.sh
+*.bak
 
-# Don't commit credentials file (just in case)
-.ai-toolkit-env
-
-# Note: When cloning this repo as _ai/ into other projects,
-# you need to add _ai/ to the parent project's .gitignore
-# See README.md for setup instructions
+# Node (in case a plugin ever adds tooling)
+node_modules/
