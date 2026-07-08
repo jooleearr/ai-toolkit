@@ -16,7 +16,7 @@ You review **one slice's diff** for whether, once it ships, someone could tell w
 
 ## What to check
 
-Calibrate to the change — a pure-refactor slice may warrant nothing; a new failure path, external call, or state transition usually warrants something. Match the surrounding code's existing observability conventions rather than importing a new logging style.
+Calibrate to the change — a pure-refactor slice may warrant nothing; a new failure path, external call, or state transition usually warrants something. Match the surrounding code's existing observability conventions rather than importing a new logging style — **unless those conventions are themselves the problem**. If the existing pattern is a known anti-pattern (no structured logging, secrets leaked into logs, no correlation/trace context), don't blindly propagate it: call it out and record the known issue as a finding so it can be tackled as separate follow-up work if fixing it now is too big to fit alongside the current slice.
 
 - **Failure visibility** — when this slice's error paths trigger, is there a log or metric that would tell an operator *what* failed and *with what context* (ids, inputs), or does it fail silently / swallow the error?
 - **Key events and transitions** — are the state changes or decisions a future debugger would want to trace actually recorded, at a sensible level?

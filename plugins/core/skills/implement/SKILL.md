@@ -11,7 +11,7 @@ The hand-off doc is your contract. Its **acceptance criteria are the definition 
 
 ## 1. Load the plan
 
-Read the hand-off doc — `.plans/<ticket-id-or-slug>.md` by default (see the [`plan`](../plan/SKILL.md) skill's `HANDOFF-TEMPLATE.md` for the schema). If none exists, stop and send the user to the `plan` skill first; do not invent a plan and start coding.
+Read the hand-off doc — `docs/plans/<ticket-id-or-slug>.md` by default (see the [`plan`](../plan/SKILL.md) skill's `HANDOFF-TEMPLATE.md` for the schema). If none exists, stop and send the user to the `plan` skill first; do not invent a plan and start coding. If you need to create the `docs/plans/` directory and a `docs/` directory does not already exist, check with the user that it's OK to create that parent directory before doing so.
 
 Take the **acceptance criteria** as the definition of done and the **slice checklist** as the ordered work queue. Note the **decided vs assumed** split — you will verify the assumptions as you go, and flag any that turn out false rather than quietly coding around them.
 
@@ -40,6 +40,8 @@ Implement the slice's **end-to-end path** — a thin but complete route through 
 ## 4. Verify the slice works
 
 Prove the slice actually works end-to-end before reviewing it. Drive the real flow — invoke the `verify` or `run` skill — and observe the behaviour; a green test suite is necessary, not sufficient. A slice that compiles but was never exercised is not done.
+
+> **Note:** `verify`, `run`, `code-review`, and `simplify` are Claude Code built-in skills available in the environment — they are not part of this marketplace and don't need to be written here.
 
 **Completion criterion:** the slice's end-to-end path has been observed working, not merely built.
 
