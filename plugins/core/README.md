@@ -7,6 +7,7 @@ Core reusable skills that apply to any project.
 | Skill | Invoke | Purpose |
 | :---- | :----- | :------ |
 | `docs-scaffold` | `/core:docs-scaffold` (or model-invoked) | Scaffold a standardised `docs/` structure with architecture, ADRs, and a runbook. |
+| `plan` | `/core:plan` (or model-invoked) | Turn a task (Jira ticket, Slack thread, brief) into a shared understanding, then a hand-off/plan doc decomposed into vertical slices. First skill in the plan → implement → review pipeline. Discloses its doc schema to a sibling `HANDOFF-TEMPLATE.md`. |
 | `writing-great-skills` | `/core:writing-great-skills` (user-invoked) | Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable. Use it when authoring the toolkit's own skills. Discloses its glossary to a sibling `GLOSSARY.md`. |
 
 ### Attribution
