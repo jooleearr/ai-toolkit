@@ -7,7 +7,18 @@ Core reusable skills that apply to any project.
 | Skill | Invoke | Purpose |
 | :---- | :----- | :------ |
 | `docs-scaffold` | `/core:docs-scaffold` (or model-invoked) | Scaffold a standardised `docs/` structure with architecture, ADRs, and a runbook. |
+| `implement` | `/core:implement` (or model-invoked) | Implement a hand-off doc from the `plan` skill one vertical slice at a time, holding quality (testing, clean code, architecture, observability) as a constraint and proving the original problem solved. Dispatches the review agents below per slice. |
 | `writing-great-skills` | `/core:writing-great-skills` (user-invoked) | Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable. Use it when authoring the toolkit's own skills. Discloses its glossary to a sibling `GLOSSARY.md`. |
+
+## Agents
+
+Dispatched (not invoked directly) — the `implement` skill spawns these per slice for an independent, fresh-context review pass. Each is read-only and reports findings for the implementing agent to reconcile.
+
+| Agent | Reviews |
+| :---- | :------ |
+| `architecture-reviewer` | Boundary/layer fit against the plan; structural change smuggled in under a feature. |
+| `test-reviewer` | Behaviour coverage of the acceptance criteria; tests that assert behaviour, not implementation. |
+| `observability-reviewer` | Whether the slice is diagnosable in production (logging, metrics, tracing) without leaking secrets. |
 
 ### Attribution
 
