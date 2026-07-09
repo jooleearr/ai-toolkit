@@ -1,6 +1,6 @@
 # Review rubric
 
-The vocabulary for a pre-push review finding: the **category** that names the concern, the **severity** that ranks it, and the **Conventional Comments** line that states it. Consulted from step 6 of [`SKILL.md`](SKILL.md).
+The vocabulary for a pre-push review finding: the **category** that names the concern, the **severity** that ranks it, and the **Conventional Comments** line that states it. Consulted from step 7 of [`SKILL.md`](SKILL.md).
 
 ## Categories
 
@@ -15,6 +15,7 @@ Every finding sits in exactly one category. They double as the report's section 
 | `readability` | Naming, dead code, units that fight the surrounding idiom. |
 | `security` | Auth, secrets, input handling, permissions. Folded in from `security-review` where it ran. |
 | `observability` | Logging, metrics, tracing the change warrants — diagnosable in production, no secrets leaked. |
+| `code-smell` | Maintainability signs from the Fowler catalogue — Long Function, Data Clumps, Feature Envy, and the rest. From the [`CODE-SMELLS.md`](CODE-SMELLS.md) pass (step 3); each finding names the smell and pairs it with a refactoring. |
 
 ## Severity
 
@@ -27,6 +28,8 @@ Three levels, and the decoration each maps to. Rank the report by this order.
 | **nitpick** | Minor polish; author's discretion. | `(non-blocking)` |
 
 The **verdict** is mechanical: any blocker → *needs work*; zero blockers → *ready to push* (issues and nits listed, but not gating).
+
+`code-smell` findings are **advisory** — they land as `issue` or `nitpick`, never a `blocker` on their own. A smell only rises to blocking when it *also* trips another category (e.g. a duplicated branch that drops a case is `correctness`).
 
 ## Conventional Comments format
 
