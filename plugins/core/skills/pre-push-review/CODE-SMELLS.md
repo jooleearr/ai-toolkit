@@ -1,8 +1,8 @@
 # Code smells
 
-The catalogue for the **code-smell pass** — Martin Fowler's smells from *Refactoring* (2nd ed.), each paired with the signals that betray it in a diff and the refactoring that removes it. Consulted from step 3 of [`SKILL.md`](SKILL.md). Described in this skill's own words, not the book's.
+The catalogue for the **code-smell pass** — Fowler's smells from *Refactoring*, each paired with the diff signals that betray it and the refactoring that removes it. Consulted from step 3 of [`SKILL.md`](SKILL.md).
 
-A smell is a *hint*, not a verdict: a surface sign that the design may be paying for something. Every finding here is **advisory** — it names what looks off and points at the fix, and the author decides. Keep that in mind while reading the catalogue below.
+A smell is a *hint*, not a verdict. Every finding here is **advisory** — it names what looks off, points at the fix, and leaves the call to the author.
 
 ## How to use this catalogue
 
