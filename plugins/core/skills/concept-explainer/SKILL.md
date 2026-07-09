@@ -7,7 +7,7 @@ description: Use when you're working in an unfamiliar area and want to understan
 
 Build a durable **mental model** in the reader's head — not a one-off answer they forget by tomorrow. The measure of success is that they could re-explain the thing themselves afterwards.
 
-Two habits carry the whole skill. **Scaffold**: meet the reader where they are and add one rung at a time, shallow before deep — you can always go deeper, but you can't un-confuse. **Follow the flow**: explain how the thing *moves through the system* end to end, never a term defined in isolation.
+Three habits carry the whole skill. **Scaffold**: meet the reader where they are and add one rung at a time, shallow before deep — you can always go deeper, but you can't un-confuse. **Follow the flow**: explain how the thing *moves through the system* end to end, never a term defined in isolation. **Plain voice**: write the way you'd say it out loud — short, concrete words, no filler and no LLM tics (nothing is "load-bearing", nothing "delves"). If a plainer word exists, use it.
 
 ## 1. Calibrate
 
@@ -36,9 +36,9 @@ A few sentences per part, not a wall of text — depth is step 5's job.
 
 ## 4. Draw it
 
-Render a diagram so the reader *sees* the structure instead of reconstructing it from prose. Choose the diagram type that fits what you're explaining and render it as Mermaid so it displays — see [`DIAGRAMS.md`](DIAGRAMS.md) for type selection and the rendering mechanics. The diagram must match the flow you traced in step 3.
+Draw a diagram *when it genuinely earns its place* — when the concept has structure or a flow that's easier to see than to read (a pipeline, a state machine, a hierarchy). Skip it when prose already makes the model clear; a diagram of something simple is noise. When you do draw one, render it as Mermaid so it displays, choose the type that fits — see [`DIAGRAMS.md`](DIAGRAMS.md) for type selection and the rendering mechanics — and make it match the flow you traced in step 3.
 
-**Completion criterion:** a rendered diagram the reader can see, consistent with the step 3 flow.
+**Completion criterion:** either a rendered diagram the reader can see, consistent with the step 3 flow, or a deliberate decision that one wouldn't add understanding here.
 
 ## 5. Check, then deepen
 
