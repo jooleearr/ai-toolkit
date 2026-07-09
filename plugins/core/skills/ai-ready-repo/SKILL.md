@@ -104,8 +104,6 @@ world to *preserve* (durable domain knowledge) from the world being *replaced*
 - `docs/plans/` — per-ticket implementation plans (the hand-off docs the `plan` and
   `implement` skills read).
 
-If a bare docs skeleton is all that's wanted, the `docs-scaffold` skill covers it; this
-step goes further with the durability split and the forward-only ADR convention.
 `retrofit`: **triage** inherited docs — assess, relocate, or delete rather than trust; git
 history is the archive. If creating `docs/` requires creating a `docs/` parent that does
 not yet exist, confirm with the user first.
@@ -117,18 +115,12 @@ triage, and no rationale was fabricated.
 ## 6. Capture the conventions
 
 Record the working agreements once, in `docs/`, and point the rules and PR template at
-them (see [`PATTERNS.md`](PATTERNS.md) for the full list): Conventional Commits (with
-tracker key where one is in use), Conventional Comments for review, rebase-over-merge in
-feature branches, branch naming, and comment/editor style. Two conventions carry weight:
-
-- **documented, not adjacent** — match the *documented* convention, not the closest
-  existing file. In inherited codebases the nearest file may carry a pattern we don't want
-  perpetuated; if code contradicts the docs, treat it as legacy debt — flag it or fix the
-  doc, don't extend it.
-- **doc-currency discipline** — keeping the agent context current is part of "done",
-  surfaced across working-agreements, rules, and the PR template, but **advisory, not a
-  blocking gate** (blocking doc-diff checks are noisy). A "your change → surface to update"
-  table makes it concrete; a visible `⚠️ STALE` marker beats silent staleness.
+them: Conventional Commits (with tracker key where one is in use), Conventional Comments
+for review, rebase-over-merge in feature branches, branch naming, and comment/editor
+style. Two carry extra weight — **documented, not adjacent** (match the documented
+convention, not the nearest existing file) and **doc-currency discipline** (keeping the
+agent context current is part of "done", advisory rather than a blocking gate). See
+[`PATTERNS.md`](PATTERNS.md) for the rationale behind each and the full list.
 
 **Completion criterion:** the conventions live in one `docs/` file, including the
 documented-not-adjacent precedence and the advisory doc-currency table, and the entry
