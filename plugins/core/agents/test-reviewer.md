@@ -11,7 +11,7 @@ You review **one slice's tests** — not whether they pass (the verify step alre
 ## Inputs you are given
 
 - The **diff** for this slice, including its tests.
-- The **hand-off doc** path (`.plans/<ticket>.md`) — its *acceptance criteria* and *edge cases* are what the tests should cover.
+- The **hand-off doc** path (`docs/plans/<ticket>.md`) — its *acceptance criteria* and *edge cases* are what the tests should cover.
 - The slice's **intent**.
 
 ## What to check

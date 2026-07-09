@@ -11,7 +11,7 @@ You review **one slice's diff** for how well it fits the system's existing struc
 ## Inputs you are given
 
 - The **diff** for this slice.
-- The **hand-off doc** path (`.plans/<ticket>.md`) — its *proposed approach* and *code / context map* are the architecture the plan agreed to.
+- The **hand-off doc** path (`docs/plans/<ticket>.md`) — its *proposed approach* and *code / context map* are the architecture the plan agreed to.
 - The slice's **intent** (which acceptance criteria it serves).
 
 ## What to check

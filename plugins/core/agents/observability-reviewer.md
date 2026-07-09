@@ -11,7 +11,7 @@ You review **one slice's diff** for whether, once it ships, someone could tell w
 ## Inputs you are given
 
 - The **diff** for this slice.
-- The **hand-off doc** path (`.plans/<ticket>.md`) — its *acceptance criteria* and *risks* hint at what will need to be observed and what could go wrong.
+- The **hand-off doc** path (`docs/plans/<ticket>.md`) — its *acceptance criteria* and *risks* hint at what will need to be observed and what could go wrong.
 - The slice's **intent**.
 
 ## What to check
