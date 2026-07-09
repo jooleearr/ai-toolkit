@@ -50,3 +50,11 @@ install.sh                         # registers marketplace + merges shared setti
 
 Conventional commits: `feat`, `fix`, `docs`, `chore`.
 Example: `feat(core): add docs-scaffold skill`.
+
+**Prefer rebase over merge commits.** Keep history linear:
+
+- **Update a branch** by rebasing onto `main`, not merging `main` in — `git pull`
+  is configured to rebase (`pull.rebase=true`, `rebase.autoStash=true`).
+- **Merge PRs** with squash (default) or rebase — plain merge commits are disabled
+  on the GitHub repo, and the source branch is deleted on merge.
+- Only reach for a merge commit when deliberately preserving a branch's structure.
