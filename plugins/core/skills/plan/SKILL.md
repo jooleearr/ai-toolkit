@@ -54,6 +54,6 @@ Agents default to large batches — a whole horizontal layer (all the models, th
 
 ## 5. Write the hand-off doc
 
-Write the doc to `.plans/<ticket-id-or-slug>.md` (create `.plans/` if absent; commit it — it is a shared artefact for the human reviewer and the downstream skills). Populate every section of [`HANDOFF-TEMPLATE.md`](HANDOFF-TEMPLATE.md) from what the grilling and slicing produced — do not open the template before this step.
+Write the doc to `docs/plans/<ticket-id-or-slug>.md` (create `docs/plans/` if absent; commit it — it is a shared artefact for the human reviewer and the downstream skills). If you need to create the `docs/plans/` directory and a `docs/` directory does not already exist, check with the user that it's OK to create that parent directory before doing so. Populate every section of [`HANDOFF-TEMPLATE.md`](HANDOFF-TEMPLATE.md) from what the grilling and slicing produced — do not open the template before this step.
 
-**Completion criterion:** the file exists at `.plans/…`, every template section is filled (no placeholders), and the decided/assumed split from step 2 is recorded verbatim.
+**Completion criterion:** the file exists at `docs/plans/…`, every template section is filled (no placeholders), and the decided/assumed split from step 2 is recorded verbatim.
