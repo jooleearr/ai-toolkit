@@ -61,7 +61,7 @@ Then bind the slices to the whole spec:
 - **Coverage check** — every requirement in the spec lands in exactly one ticket, *or* is named as a **cross-cutting constraint** carried into several. Nothing silently dropped, nothing duplicated. A constraint (e.g. "writes must feel instant and the UI must never lie about the server") is not a follow-up ticket — it rides along inside the tickets it constrains.
 - **Non-goals survive.** Carry the spec's non-goals into the tickets so they are never quietly re-scoped back in.
 - **Order by dependency, then by value.** Sequence primarily by the blocking graph, but respect the spec's own priority signal — an evaluation rubric, a "rough priority order" list, a timebox. When a spec is timeboxed, order so that **stopping early still leaves something coherent and demoable**, and front-load whatever the spec says it values.
-- **Wide-refactor exception** (brownfield) — a change whose blast radius is too wide for any vertical slice to land green (rename a shared column, retype a shared symbol) is the one case a ticket may span a layer; handle it as an expand–contract migration rather than forcing it vertical.
+- **Wide-refactor exception** (brownfield) — a change whose blast radius is too wide for any single vertical slice to land green (rename a shared column, retype a shared symbol) is decomposed by an expand–contract migration into an ordered set of individually-shippable tickets (expand → migrate → contract), each of which still lands green on its own.
 
 **Completion criterion:** an ordered set of tickets exists; every spec requirement maps to exactly one ticket or a named cross-cutting constraint; every ticket has its blocking edges; non-goals are carried through; and a timeboxed spec stops cleanly at any point in the sequence.
 
@@ -75,9 +75,9 @@ Before publishing anything, walk the user through the proposed breakdown and qui
 
 One artifact, two readings — the tickets are identical, only the blocking edges change form. Ask the user which shape they want. Populate every ticket from [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md); do not open the template before this step.
 
-- **Local file** — a `docs/tickets/tickets.md` in dependency order (blockers first), each ticket's "Blocked by" written as text. Worked top to bottom, by hand, staying in the loop. Create `docs/tickets/` if absent; if a `docs/` directory does not already exist, check with the user before creating that parent, per the `plan` convention.
+- **Local file** — a `docs/tickets/tickets.md` in dependency order (blockers first), each ticket's "Blocked by" written as text. Worked top to bottom, by hand, staying in the loop. Create `docs/tickets/` if absent; if a `docs/` directory does not already exist, check with the user before creating that parent.
 - **GitHub issues** — one issue per ticket, **published blockers first** so each "Blocked by" can reference a real issue number via native sub-issue/blocking relationships. A ticket is then picked up exactly like a Jira ticket and fed straight into `plan` — which is the point: it makes a personal project feel like the day-job board.
 
-Whatever the shape, each ticket must be consumable by a **fresh `plan` context without reading the whole spec**, while still linking back to it. The frontier is parallelisable — several unblocked tickets can be handed to several agents at once (see `silverstripe-worktree-lanes` for isolated lanes) — but that is the operator's call, not this skill's to orchestrate.
+Whatever the shape, each ticket must be consumable by a **fresh `plan` context without reading the whole spec**, while still linking back to it. The frontier is parallelisable — several unblocked tickets can be handed to several agents at once — but that is the operator's call, not this skill's to orchestrate.
 
 **Completion criterion:** the tickets exist in the chosen shape, blockers first, each filled from the template with no placeholders, each linking back to the spec and readable without it.
