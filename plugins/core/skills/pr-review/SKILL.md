@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Use when reviewing an open GitHub PR — usually a teammate's — against its Jira ticket, when asked to "review this PR" or "review PR #123", or when you want teammate-style feedback drafted as an editable pending review. Outward-facing sibling of pre-push-review: reviews someone else's change after it's up, against the ticket, PR description, and diff, with no hand-off doc to lean on. Walks business-context, architecture, security, over-engineering, dependency, semantic-drift, documentation, testing, observability, and accessibility passes; delegates diff-level bug-hunting to code-review and reuses pre-push-review's Fowler smell catalogue and rubric. Comments read as a colleague, not a linter. Always asks before posting, and defaults to a pending draft review you can edit in GitHub.
+description: Use when reviewing an open GitHub PR — usually a teammate's — against its Jira ticket, when asked to "review this PR" or "review PR #123", or when you want teammate-style feedback drafted as an editable pending review. Outward-facing sibling of pre-push-review: reviews someone else's change after it's up, against the ticket, PR description, and diff, with no hand-off doc to lean on. Walks business-context, architecture, security, over-engineering, dependency, semantic-drift, documentation, testing, observability, and accessibility passes; delegates diff-level bug-hunting to code-review and bundles the Fowler smell catalogue and rubric it shares with pre-push-review. Comments read as a colleague, not a linter. Always asks before posting, and defaults to a pending draft review you can edit in GitHub.
 ---
 
 # PR review
@@ -27,7 +27,7 @@ Run the `code-review` skill (a Claude Code built-in) for correctness and reuse/c
 
 ## 3. Scan the diff for code smells
 
-Walk the diff once against the shared **code-smell** catalogue in [`../pre-push-review/CODE-SMELLS.md`](../pre-push-review/CODE-SMELLS.md) — Fowler's smells, each with the diff signals that betray it and the refactoring that removes it. Reuse it; don't restate it.
+Walk the diff once against the **code-smell** catalogue in [`CODE-SMELLS.md`](CODE-SMELLS.md) — Fowler's smells, each with the diff signals that betray it and the refactoring that removes it. Reuse it; don't restate it.
 
 The catalogue's two rules keep this pass useful rather than noisy: it is **diff-scoped** (flag only a smell the change *introduces or worsens*, never a pre-existing one the diff merely sits next to) and it favours **precision over recall** (stay silent on a borderline signal — a wrong flag on someone else's PR spends more trust than it does on your own). Findings here are **advisory** — `issue` or `nitpick`, never a blocker on their own.
 
@@ -75,7 +75,7 @@ The rules behind that:
 
 ## 6. Categorise, rank, and check the batch
 
-Turn everything from steps 2–5 into findings, each carrying a **category**, a **severity**, and a single **Conventional Comments** line — the category set, severity scale, and `(blocking)` / `(non-blocking)` decorations all live in the shared [`../pre-push-review/REVIEW-RUBRIC.md`](../pre-push-review/REVIEW-RUBRIC.md). Reuse it; don't restate it. Order the list **blocker-first**, so the reader triages the highest-impact items before any nit.
+Turn everything from steps 2–5 into findings, each carrying a **category**, a **severity**, and a single **Conventional Comments** line — the category set, severity scale, and `(blocking)` / `(non-blocking)` decorations all live in [`REVIEW-RUBRIC.md`](REVIEW-RUBRIC.md). Reuse it; don't restate it. Order the list **blocker-first**, so the reader triages the highest-impact items before any nit.
 
 Two scoping rules keep the review fair to the author:
 
