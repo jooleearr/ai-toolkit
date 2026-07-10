@@ -180,7 +180,17 @@ decision was made, see [`adr/`](adr/); for the durable domain language, see
 
 ## Consequences
 
-<what becomes easier, what becomes harder, what we accept>
+### Positive
+
+<what becomes easier or better as a result of this decision>
+
+### Negative
+
+<what becomes harder — the cost, risk, or capability given up>
+
+### Neutral
+
+<trade-offs accepted that are neither a clear win nor loss>
 ```
 
 Also seed `docs/architecture/adr/inherited-baseline.md` for a retrofit, as clearly-labelled
