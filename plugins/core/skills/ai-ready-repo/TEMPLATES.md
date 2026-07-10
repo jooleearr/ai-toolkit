@@ -113,7 +113,9 @@ read the same files.
 | When you're… | Read |
 | :----------- | :--- |
 | making any non-trivial change | `CONTEXT.md` (domain glossary) |
+| getting the shape of the system | `architecture/README.md` (current components) |
 | changing architecture | `architecture/adr/` (past decisions), then add a new ADR |
+| running, deploying, or operating it | `runbook.md` |
 | picking up a ticket | `plans/<ticket>.md` |
 | unsure of a convention | `working-agreements.md` |
 ```
@@ -129,6 +131,34 @@ rewrite. Read before non-trivial changes.
 ## Glossary
 
 - **<Term>** — <definition>. <!-- TODO: seed with the project's real domain terms -->
+```
+
+## `docs/architecture/README.md` (current system shape)
+
+```md
+# Architecture
+
+> ⚠️ Implementation-coupled — the layer most prone to drift. Keep it a **map**, not a copy:
+> name each part and link to where it lives; don't restate what the code or an ADR already
+> says. Mark it `⚠️ STALE` at the top the moment you know it has drifted.
+
+What the system **is now** — the shape an agent needs before touching it. For *why* a
+decision was made, see [`adr/`](adr/); for the durable domain language, see
+[`../CONTEXT.md`](../CONTEXT.md).
+
+## Components
+
+| Part | Lives in | Responsibility |
+| :--- | :------- | :------------- |
+| <component> | `<path/>` | <one line — what it owns> | <!-- TODO: seed from the real tree -->
+
+## How a request flows
+
+<two or three sentences, or a small diagram, tracing one representative path end to end>
+
+## Key decisions in force
+
+- <decision> — see [`adr/NNNN-*.md`](adr/). <!-- link, don't restate the rationale -->
 ```
 
 ## `docs/architecture/adr/0000-template.md` (ADR template — forward-only)
@@ -155,6 +185,35 @@ rewrite. Read before non-trivial changes.
 
 Also seed `docs/architecture/adr/inherited-baseline.md` for a retrofit, as clearly-labelled
 **observations** of significant inherited choices — never as invented rationale.
+
+## `docs/runbook.md` (operate and diagnose)
+
+```md
+# Runbook
+
+How to run, deploy, operate, and diagnose this project — the on-call knowledge that isn't a
+single command. Anything already scripted lives in [`../scripts/`](../scripts/); this file
+**points at the script, it does not restate the commands**.
+
+## Run locally
+
+`scripts/setup.sh`, then `<how to start it>`. <!-- point at the script, not a command list -->
+
+## Deploy
+
+<who deploys, from where, how to trigger it, how to roll back>
+
+## Operate
+
+- **Health / where to look:** <dashboards, logs, key metrics>
+- **Config & secrets:** <where they live; never paste real values>
+
+## When it breaks
+
+| Symptom | First look | Likely cause / fix |
+| :------ | :--------- | :----------------- |
+| <symptom> | <log / dashboard> | <first response> | <!-- TODO: seed from real incidents -->
+```
 
 ## `docs/working-agreements.md` (conventions)
 

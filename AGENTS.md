@@ -49,7 +49,7 @@ install.sh                         # registers marketplace + merges shared setti
 ## Git conventions
 
 Conventional commits: `feat`, `fix`, `docs`, `chore`.
-Example: `feat(core): add docs-scaffold skill`.
+Example: `feat(core): add ai-ready-repo skill`.
 
 **Prefer rebase over merge commits.** Keep history linear:
 

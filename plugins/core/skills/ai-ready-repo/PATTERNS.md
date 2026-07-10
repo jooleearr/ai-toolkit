@@ -60,6 +60,30 @@ worse than none. Record significant inherited choices separately as clearly-labe
 **observations** (an `inherited-baseline.md`), never as fabricated ADRs. When a new decision
 changes documented behaviour, cite the prior one in a `Supersedes` / `Previously` field.
 
+### Overview vs ADRs — *what it is now* vs *why it changed*
+
+An ADR log records **why** each decision changed; it never states **what the system is now**.
+An agent landing cold would have to replay every ADR to reconstruct the current shape — so
+`docs/architecture/README.md` holds that shape directly: the major components, where each
+lives, and one representative flow. Keep the two honest about their jobs — the overview is
+the map, the ADRs are the changelog.
+
+The overview is **implementation-coupled**, so it is the layer most prone to going stale —
+exactly what **point, don't duplicate** guards against. Mitigate the same way everywhere
+else does: keep it an *index* (name each part and link to the code/ADR, never restate them),
+and make staleness visible with a `⚠️ STALE` marker rather than letting it rot silently. An
+overview that copies the code is worse than none; an overview that points at it earns its
+place.
+
+### The runbook — operational knowledge scripts can't hold
+
+`scripts/` gives deterministic entry points for *development* workflows (setup, build, verify),
+but deploy, operate, and diagnose knowledge — rollback steps, where to look when it breaks,
+first-response for a symptom — has no home there. `docs/runbook.md` is that home. It obeys
+the same discipline: **defer to `scripts/`** for anything already scripted (point at the
+entry point, don't restate the commands), and carry only the on-call knowledge that isn't a
+single command.
+
 ## Conventions to capture
 
 Record once in `docs/` (a working-agreements file), and point rules and the PR template at

@@ -96,11 +96,22 @@ world to *preserve* (durable domain knowledge) from the world being *replaced*
 
 - `docs/README.md` — index with a "read this when…" table.
 - `docs/CONTEXT.md` — the durable domain glossary / shared language.
-- `docs/architecture/adr/` — numbered ADRs with `0000-template.md`. ADRs are
+- `docs/architecture/README.md` — the **current system shape**: a map of the major
+  components and where each lives, pointing into the code and `adr/` rather than restating
+  them. This is the *what the system is now* an ADR log can't give — an agent landing cold
+  reads this instead of replaying every ADR. It is implementation-coupled and the layer most
+  prone to drift, so keep it an index (names and links, not copied detail) and top it with a
+  visible staleness caution.
+- `docs/architecture/adr/` — numbered ADRs with `0000-template.md`, recording *why a
+  decision changed* (the README above records *what the system is now*). ADRs are
   **forward-only**: never write retrospective rationale for inherited decisions (a
   reconstructed *why* reads as authoritative but is invented). Record significant inherited
   choices separately as clearly-labelled observations, and use a `Supersedes` field when
   changing documented behaviour.
+- `docs/runbook.md` — how to run, deploy, operate, and diagnose: the on-call knowledge
+  `scripts/` can't hold. **Defer to `scripts/`** for anything already scripted — point at
+  the entry point, never restate the commands — and cover the deploy, operate, and
+  first-response steps that aren't a single command.
 - `docs/plans/` — per-ticket implementation plans (the hand-off docs the `plan` and
   `implement` skills read).
 
@@ -108,9 +119,9 @@ world to *preserve* (durable domain knowledge) from the world being *replaced*
 history is the archive. If creating `docs/` requires creating a `docs/` parent that does
 not yet exist, confirm with the user first.
 
-**Completion criterion:** `docs/` has the README index, CONTEXT glossary, ADR directory
-with a forward-only template, and a plans directory; no inherited doc was trusted without
-triage, and no rationale was fabricated.
+**Completion criterion:** `docs/` has the README index, CONTEXT glossary, an architecture
+overview, a forward-only ADR directory, a runbook that defers to `scripts/`, and a plans
+directory; no inherited doc was trusted without triage, and no rationale was fabricated.
 
 ## 6. Capture the conventions
 
