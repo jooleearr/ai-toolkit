@@ -14,6 +14,7 @@ The order is a guardrail: agreement on *what* and *why* is a hard gate that come
 Normalise the source into one restated problem, in your own words:
 
 - **Jira** — if a Jira MCP server or `jira` CLI is available, pull the ticket by ID/URL; otherwise ask the user to paste it. Follow linked tickets and docs that bear on scope.
+- **Ticket from `spec-to-tickets`** — a tracer-bullet ticket (a `docs/tickets/tickets.md` entry or a GitHub issue) is already scoped, demoable, and readable without the spec; ingest it directly and follow its "Spec reference" back only if you need the wider context.
 - **Other sources** — Slack thread, bug report, verbal brief: capture the raw text and any links the user gives.
 
 Restate the problem back to the user in two or three sentences and get a "yes, that's it" before grilling. If you can't restate it, you don't understand it yet.
