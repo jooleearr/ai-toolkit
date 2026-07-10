@@ -10,8 +10,8 @@ install what you want, where you want it. Updates are a single command.
 
 ```bash
 # One-time, per machine — register the marketplace
-claude plugin marketplace add jooleear/ai-toolkit
-#   ...or inside a Claude Code session:  /plugin marketplace add jooleear/ai-toolkit
+claude plugin marketplace add jooleearr/ai-toolkit
+#   ...or inside a Claude Code session:  /plugin marketplace add jooleearr/ai-toolkit
 
 # Per project (or globally) — install a plugin
 claude plugin install core@ai-toolkit
@@ -21,7 +21,7 @@ claude plugin install core@ai-toolkit
 Or run the helper, which also installs the shared permission defaults:
 
 ```bash
-git clone https://github.com/jooleear/ai-toolkit.git
+git clone https://github.com/jooleearr/ai-toolkit.git
 cd ai-toolkit
 ./install.sh            # registers marketplace + merges default permissions into ~/.claude
 ./install.sh --project /path/to/repo   # merge permissions into one project instead
