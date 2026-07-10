@@ -49,7 +49,7 @@ ai-toolkit/
 
 | Plugin | Install | Contents |
 | :----- | :------ | :------- |
-| `core` | `core@ai-toolkit` | General skills, e.g. `docs-scaffold`. See [plugins/core](plugins/core/README.md). |
+| `core` | `core@ai-toolkit` | General skills, e.g. `ai-ready-repo`. See [plugins/core](plugins/core/README.md). |
 
 ## Adding resources
 
@@ -67,4 +67,4 @@ See [AGENTS.md](AGENTS.md) for conventions (`CLAUDE.md` just imports it — see 
 Repo guidance for AI agents lives in a tool-agnostic [`AGENTS.md`](AGENTS.md), and each
 tool's own file imports it. Here, `CLAUDE.md` contains only `@AGENTS.md`. This keeps
 instructions in one place and portable across AI tooling — use the same pattern in every
-project (the `docs-scaffold` skill sets it up for you).
+project (the `ai-ready-repo` skill sets it up for you).
