@@ -19,7 +19,7 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="$REPO_DIR/shared/settings.template.json"
-MARKETPLACE="jooleear/ai-toolkit"
+MARKETPLACE="jooleearr/ai-toolkit"
 
 DO_MARKETPLACE=true
 DO_SETTINGS=true
