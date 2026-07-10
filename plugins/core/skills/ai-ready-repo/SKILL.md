@@ -69,7 +69,7 @@ the stacks the project actually uses (detected in step 1).
 
 ## 4. Committed settings with personal override
 
-Commit a `.claude/settings.json` of shared defaults, and let individuals override it
+Set up a `.claude/settings.json` of shared defaults, and let individuals override it
 privately. Precedence is **deny > ask > allow**; local overrides shared. The tiers:
 
 - **deny** — secret-read guards (`.env`, `.env.*`, `secrets/**`, terraform state),
@@ -79,12 +79,23 @@ privately. Precedence is **deny > ask > allow**; local overrides shared. The tie
 - **ask** — state-changing-but-routine actions (`git commit`, `git push`, `gh pr create`,
   rebase).
 
-Ship the curated default set from [`TEMPLATES.md`](TEMPLATES.md), then adapt the allow/ask
-tiers to the detected tooling. Add `.claude/settings.local.json` to `.gitignore` while
-committing the shared `.claude/` files.
+Start from the curated default set in [`TEMPLATES.md`](TEMPLATES.md), then adapt the
+allow/ask tiers to the detected tooling.
 
-**Completion criterion:** `.claude/settings.json` is committed with all three tiers and the
-protected-branch name filled in; `.gitignore` commits shared `.claude/` files and ignores
+> **The agent must not write `settings.json` itself.** Claude Code's self-modification
+> guardrail blocks an agent from writing `permissions.allow/ask/deny` rules into any
+> `settings.json` (it reads as the agent widening its own permissions from untrusted
+> content). So **emit the adapted file content and ask the user to save and commit it**
+> to `.claude/settings.json` — don't attempt the write yourself, and don't treat the
+> denial as a failure. The `.gitignore` addition and other non-settings files in this
+> step are yours to write as normal.
+
+Add `.claude/settings.local.json` to `.gitignore` while committing the shared `.claude/`
+files.
+
+**Completion criterion:** the adapted `.claude/settings.json` content — all three tiers,
+protected-branch name filled in — has been handed to the user to save and commit (not
+written by the agent); `.gitignore` commits shared `.claude/` files and ignores
 `settings.local.json`.
 
 ## 5. Durability-organised docs

@@ -18,13 +18,24 @@ claude plugin install core@ai-toolkit
 #   ...or inside a session:  /plugin install core@ai-toolkit
 ```
 
-Or run the helper, which also installs the shared permission defaults:
+Or run the helper. By default it only registers the marketplace — the agent-safe part:
 
 ```bash
 git clone https://github.com/jooleearr/ai-toolkit.git
 cd ai-toolkit
-./install.sh            # registers marketplace + merges default permissions into ~/.claude
-./install.sh --project /path/to/repo   # merge permissions into one project instead
+./install.sh                       # registers the marketplace only
+```
+
+The shared permission defaults (`shared/settings.template.json`) are a **manual
+reference** — copy the tiers you want into a project's `.claude/settings.json`. A
+**human must apply them**: Claude Code's self-modification guardrail blocks an agent
+from writing permission rules for you. To merge them with the helper (run it
+yourself, not via an agent):
+
+```bash
+./install.sh --settings            # merge into ./.claude/settings.json (this project)
+./install.sh --settings --project /path/to/repo   # into another project
+./install.sh --settings --global   # into ~/.claude/settings.json (explicit opt-in)
 ```
 
 Keep everything current with `/plugin marketplace update` (or `claude plugin marketplace update ai-toolkit`).
