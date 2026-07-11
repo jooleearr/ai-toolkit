@@ -44,9 +44,11 @@ Implement the slice's **end-to-end path** — a thin but complete route through 
 
 Prove the slice actually works end-to-end before reviewing it. Drive the real flow — invoke the `verify` or `run` skill — and observe the behaviour; a green test suite is necessary, not sufficient. A slice that compiles but was never exercised is not done.
 
+**When the slice's acceptance criteria are browser-UI behaviour** and no automated test covers them, driving the flow means *rendering* it — a fetch that throws and a query that reports `isError` are logic, not the plain-language error and working **Try again** button a criterion actually asks for. Check whether a Playwright MCP server is connected; if it is, offer to use it to drive the UI and observe the real rendered states (load → success, forced-failure → error state → retry click). If no browser driver is available, verify at the logic level instead and **say so explicitly** — name the criterion as verified logic-level only — so the gap between reasoned-about and observed behaviour is visible rather than silent.
+
 > **Note:** `verify`, `run`, `code-review`, and `simplify` are Claude Code built-in skills available in the environment — they are not part of this marketplace and don't need to be written here.
 
-**Completion criterion:** the slice's end-to-end path has been observed working, not merely built.
+**Completion criterion:** the slice's end-to-end path has been observed working, not merely built — and any browser-UI criterion has either been driven through a browser (via Playwright MCP) or explicitly flagged as verified at the logic level only.
 
 ## 5. Review the slice from fresh context
 
