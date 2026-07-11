@@ -11,7 +11,7 @@ The distinction that defines this skill is **intent over diff**. Generic linters
 
 Third skill in the **plan → implement → pre-push review** pipeline. Its inputs are the same three artefacts the pipeline carries: the **ticket**, the **hand-off doc**, and the **working diff**.
 
-**Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) owns the **per-slice, structural** review — the `architecture-reviewer`, `test-reviewer`, and `observability-reviewer` agents, run while each slice's context is fresh — and produces the acceptance-criteria evidence. This skill owns the **whole-change** review: the single `code-review`/`security-review` correctness pass (step 2), the code-smell scan (step 3), and the authoritative verdict against acceptance criteria, scope, and non-goals (steps 4–5). The two don't re-hunt each other's ground — `implement` doesn't run `code-review` per slice, and this skill audits the criteria evidence rather than re-demonstrating it.
+**Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) builds the change one slice at a time and makes the project's **tests, type checks, and linters** pass — and stops there; it runs **no review**. This skill owns the review in full: the `code-review`/`security-review` correctness and reuse pass (step 2), the Fowler code-smell scan (step 3), and the authoritative verdict against the acceptance criteria, scope, non-goals, and assumptions (steps 4–5). The concerns don't overlap and nothing is reviewed twice — because `implement` reviews nothing, every pass here is the first of its kind over the change.
 
 ## 1. Gather the three inputs
 
@@ -27,7 +27,7 @@ If no hand-off doc exists, you can still review against the ticket — but say s
 
 Run the `code-review` skill (a Claude Code built-in) for correctness and reuse/cleanup on the raw diff. Where the change touches a security-sensitive surface (auth, secrets, input handling, permissions), run `security-review` too. Fold their output into your report as the correctness and security categories — do **not** re-hunt those defects yourself; that is what those skills are for.
 
-This is the pipeline's **single** correctness/reuse pass, run once over the whole change. When the diff came through the [`implement`](../implement/SKILL.md) skill, its per-slice review was deliberately **structural only** (architecture, tests, observability) and did *not* run `code-review` — so this is the first correctness pass over the change, not a re-run. Review the full diff here regardless of how it was built.
+This is the pipeline's **single** correctness/reuse pass, run once over the whole change — and, because [`implement`](../implement/SKILL.md) runs no review of its own, the **first** review the change receives at all. Review the full diff here regardless of how it was built.
 
 **Completion criterion:** `code-review` has run (and `security-review` where the surface warrants it) over the whole change, and their findings are captured for your report.
 
@@ -43,7 +43,7 @@ Two rules keep this pass useful rather than noisy, both spelled out in the catal
 
 Walk **each** acceptance criterion from the ticket and decide whether the change demonstrably satisfies it — with evidence, not assertion. A criterion the diff cannot be shown to meet is a **blocking** finding: this is the "solved the wrong problem" class, the most expensive miss and the whole reason this skill exists.
 
-This is an **audit** of intent, not a re-run of the implementer's own demonstration. When the change came through [`implement`](../implement/SKILL.md), its step 7 already walked the criteria and recorded evidence (flows exercised, output observed) — verify *that* evidence stands up here rather than re-driving every criterion from scratch. Only where evidence is missing or unconvincing do you drive the flow yourself or invoke the `verify` / `run` built-in skills — a green test suite is necessary, not sufficient.
+This acceptance-criteria verdict is **this skill's to own**: [`implement`](../implement/SKILL.md) builds to the criteria and makes the tests, types, and linters pass, but it does not audit them, so this is the first and authoritative walk of them. You can lean on any flow `implement` exercised while verifying a slice (output it observed), but where that doesn't cover a criterion, drive the flow yourself or invoke the `verify` / `run` built-in skills — a green test suite is necessary, not sufficient.
 
 **Completion criterion:** every acceptance criterion is marked met or unmet, each backed by concrete evidence.
 

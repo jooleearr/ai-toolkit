@@ -1,13 +1,13 @@
 ---
 name: implement
-description: Use when implementing a hand-off doc or plan from the plan skill — turning an agreed plan into working code, one vertical slice at a time, with quality held as a constraint (testing, clean code, architecture, observability) and the original problem proven solved. Second skill in the plan → implement → pre-push review pipeline. Works in small batches and dispatches fresh-context review agents per slice.
+description: Use when implementing a hand-off doc or plan from the plan skill — turning an agreed plan into working code, one vertical slice at a time, with quality held as a constraint while coding (testing, clean code, architecture, observability) and the project's tests, type checks, and linters made to pass. Second skill in the plan → implement → pre-push review pipeline. Works in small batches, runs no code review itself, and offers to hand the built change to the pre-push-review skill.
 ---
 
 # Implement
 
 Turn a **hand-off doc** (from the [`plan`](../plan/SKILL.md) skill) into working code without accruing the tech debt that jeopardises future work. The default failure mode of agentic coding is *make the ticket pass* — shipping a whole solution in one large batch, quality bolted on afterwards if at all. This skill refuses that shape: **quality is a constraint held while coding, not a review at the end**, and work lands as **small vertical slices**, each proven end-to-end before the next begins.
 
-The hand-off doc is your contract. Its **acceptance criteria are the definition of done**; its **slice checklist is the work queue**. You implement against them and, at the end, prove the *original problem* is solved — not merely that the code compiles and tests are green.
+The hand-off doc is your contract. Its **acceptance criteria** tell you what to build; its **slice checklist is the work queue**. You implement against them and make the project's tests, type checks, and linters pass on what you land. Whether the change *demonstrably satisfies* those criteria is a review verdict — and that belongs to [`pre-push-review`](../pre-push-review/SKILL.md), not a second audit you run here.
 
 ## 1. Load the plan
 
@@ -46,21 +46,17 @@ Prove the slice actually works end-to-end before reviewing it. Drive the real fl
 
 **When the slice's acceptance criteria are browser-UI behaviour** and no automated test covers them, driving the flow means *rendering* it — a fetch that throws and a query that reports `isError` are logic, not the plain-language error and working **Try again** button a criterion actually asks for. Check whether a Playwright MCP server is connected; if it is, offer to use it to drive the UI and observe the real rendered states (load → success, forced-failure → error state → retry click). If no browser driver is available, verify at the logic level instead and **say so explicitly** — name the criterion as verified logic-level only — so the gap between reasoned-about and observed behaviour is visible rather than silent.
 
-> **Note:** `verify`, `run`, `code-review`, and `simplify` are Claude Code built-in skills available in the environment — they are not part of this marketplace and don't need to be written here.
+> **Note:** `verify` and `run` are Claude Code built-in skills available in the environment — they are not part of this marketplace and don't need to be written here.
 
 **Completion criterion:** the slice's end-to-end path has been observed working, not merely built — and any browser-UI criterion has either been driven through a browser (via Playwright MCP) or explicitly flagged as verified at the logic level only.
 
-## 5. Review the slice from fresh context
+## 5. Make the automated gates pass — tests, type checks, linting
 
-The context that wrote the slice is blind to its own gaps. Get an **independent, structural pass** before the slice is done:
+Before the slice is done, run the project's own **tests, type checks, and linters** and get them green. These are the automated gates `implement` owns — the fast, deterministic checks that prove the slice is internally sound. A slice that leaves the suite red, the types broken, or the linter complaining is not done.
 
-- **Dispatch the review agents in parallel**, in one turn — [`architecture-reviewer`](../../agents/architecture-reviewer.md), [`test-reviewer`](../../agents/test-reviewer.md), and [`observability-reviewer`](../../agents/observability-reviewer.md). Each reviews only its concern, against the hand-off doc's definition of done, from clean context. Give each the diff, the hand-off doc path, and the slice's intent.
+This skill stops at those gates: it runs **no code review**. Not the `code-review`/`simplify` skills, not `security-review`, and not the `architecture-reviewer`/`test-reviewer`/`observability-reviewer` agents. Code review of every kind — line-level correctness, reuse and cleanup, security, structural fit against the plan, and the acceptance-criteria verdict — is a **whole-change** concern owned by [`pre-push-review`](../pre-push-review/SKILL.md), run once over the full diff rather than repeated per slice. Keeping review out of `implement` is deliberate: the two skills' concerns don't overlap, and no line is reviewed twice across the pipeline.
 
-This pass is deliberately **slice-scoped and structural** — the three concerns that are cheapest to fix while the slice's context is still fresh. It does **not** run `code-review`/`simplify` or `security-review`: line-level correctness, reuse/cleanup, and security are a **whole-change** concern owned by [`pre-push-review`](../pre-push-review/SKILL.md) (its step 2), run once over the full diff rather than repeated per slice. Leaving them out here is what keeps this pass fast and stops the same lines being reviewed twice across the pipeline.
-
-Reconcile the agents' findings into a single list, dropping near-duplicates. Fix the blocking ones on this slice; fold anything genuinely out of scope into a recorded trade-off (step 6) rather than expanding the slice.
-
-**Completion criterion:** the three structural agents have reported, their findings are reconciled, and every blocking finding is either fixed or consciously deferred with a reason.
+**Completion criterion:** the project's tests, type checks, and linters all pass on the slice; no review has been run here — that is `pre-push-review`'s job.
 
 ## 6. Record trade-offs taken
 
@@ -80,19 +76,19 @@ The user can **opt into auto-commit for the rest of the session** — a faster l
 
 Tick the slice on the checklist. **Slices remaining → return to step 2** for the next one; keep the mainline mergeable between them.
 
-When the last slice is done, **prove the original problem is solved**: walk each **acceptance criterion** from the hand-off doc and show the evidence that it holds — the flow exercised, the output observed. This is the loop closing back to the ticket, and it is the real definition of done. "Tests pass" is not evidence a criterion is met; a demonstrated criterion is. **Record this evidence** (in the hand-off doc or the PR description): it is exactly what [`pre-push-review`](../pre-push-review/SKILL.md) step 4 audits, so a criterion you demonstrate here is one it need not re-drive from scratch.
+When the last slice is done, confirm the whole change still stands up together — tests, type checks, and linters green across the combined slices, not just each in isolation. The plan's **acceptance criteria** told you what to build and are how you knew each slice was aimed right; whether the finished change *demonstrably satisfies* them is a review verdict, and that walk belongs to [`pre-push-review`](../pre-push-review/SKILL.md) (its step 4). Don't run that acceptance-criteria audit here — leaving it to the review is what keeps the criteria from being walked twice across the pipeline.
 
-**Completion criterion:** every slice is ticked and every acceptance criterion is demonstrably met with concrete, recorded evidence — not just a green suite. Any criterion you can't demonstrate is an open item, surfaced to the user, not a silent gap.
+**Completion criterion:** every slice is ticked and the full change passes tests, type checks, and linting together; the acceptance-criteria verdict is left to `pre-push-review`, not duplicated here.
 
 ## 8. Hand off to pre-push review — or stop
 
-This skill's review pass (step 5) was **structural and per-slice**. The **whole-change** passes — `code-review`/`simplify` for correctness and reuse, `security-review` where the surface warrants it, the Fowler code-smell scan, and the authoritative verdict against acceptance criteria, scope, and non-goals — belong to [`pre-push-review`](../pre-push-review/SKILL.md) and have **not** run yet. Implement doesn't silently roll into them.
+Implement has built the change and made the automated gates pass, but it has run **no review**. Every review pass — the `code-review`/`simplify` correctness and reuse pass, `security-review` where the surface warrants it, the Fowler code-smell scan, and the authoritative verdict against the acceptance criteria, scope, and non-goals — belongs to [`pre-push-review`](../pre-push-review/SKILL.md) and has **not** run yet. Implement doesn't silently roll into it.
 
-So, explicitly **offer the hand-off** rather than assuming it:
+So explicitly **offer the hand-off** rather than assuming it:
 
-- **Proceed into `pre-push-review` now**, carrying the same three artefacts (ticket, hand-off doc, working diff) plus the acceptance-criteria evidence from step 7, so the review runs as part of the flow.
+- **Proceed into `pre-push-review` now**, carrying the three artefacts the pipeline shares (ticket, hand-off doc, working diff), so the review runs as part of the flow.
 - **Or stop here** so the user can review separately, later, or by hand.
 
-Default to **asking**, not auto-proceeding. If the user stops, say plainly that the whole-change correctness/reuse/security pass and the acceptance-criteria verdict are still outstanding — so "implement is done" isn't mistaken for "reviewed and ready to push".
+Default to **asking**, not auto-proceeding. If the user stops, say plainly that the change has had **no review yet** — passing tests, types, and lint is not the same as reviewed — so "implement is done" isn't mistaken for "reviewed and ready to push".
 
-**Completion criterion:** the user has been told review is not yet complete and asked whether to hand off to `pre-push-review` or stop; you act on their choice rather than defaulting into or silently skipping the review.
+**Completion criterion:** the user has been told the change has had no review yet and asked whether to hand off to `pre-push-review` or stop; you act on their choice rather than defaulting into or silently skipping the review.
