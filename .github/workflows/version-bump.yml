@@ -1,0 +1,49 @@
+name: Auto version bump
+
+# Owns the single source of truth for every plugin's `version`. On each merge to
+# main, bumps the changed plugin(s) from the merged commit's conventional-commit
+# type, then commits the result back. PRs never touch `version`, so parallel
+# branches can't conflict on it.
+
+on:
+  push:
+    branches: [main]
+
+# Serialise bumps so two quick merges can't race on the version commit.
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    # Don't recurse on the workflow's own bump commit.
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need history so the script can walk the pushed range.
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump changed plugin versions
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          chmod +x .github/scripts/bump-versions.sh
+          .github/scripts/bump-versions.sh
+
+      - name: Commit and push the bump
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No version changes to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(release): bump plugin versions [skip ci]"
+          git push
