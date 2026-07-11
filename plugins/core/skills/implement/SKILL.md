@@ -19,11 +19,14 @@ Take the **acceptance criteria** as the definition of done and the **slice check
 
 ## 2. Take one slice
 
-Pull the **next unchecked slice** from the checklist — exactly one. Create a branch for it. A slice is a **small batch**: a handful of files, no more than a few hundred lines. If, once into it, the slice grows past that, stop and re-slice rather than pushing on — a bloated slice is the signal the plan's decomposition was too coarse.
+Pull the **next unchecked slice** from the checklist and read its shape before you branch — the checklist holds two kinds, and the right unit of work is one or the other:
 
-Order matters: each slice should leave the mainline in a **working, mergeable state**. Where a slice genuinely can't merge partially working, put it behind a **feature branch** (and ideally a feature flag), as the plan noted.
+- **Independently mergeable slice** — the default. A **small batch** (a handful of files, a few hundred lines at most) whose end-to-end path leaves the mainline in a **working, mergeable state** on its own. Take exactly one, branch it, and if it grows past that size once you are into it, stop and re-slice — a bloated slice is the signal the plan's decomposition was too coarse.
+- **Internal slices of one atomic change** — pieces the hand-off doc marks as a single **tracer-bullet** unit (e.g. "T1 is itself one ticket, split into two *internal* slices"), or that you discover can't each land alone: a component that must branch on loading / error / data from the outset already carries the structure a later "add the error state" slice would only be restating. Take them **together** as one unit on one branch, and say so — forcing a split here buys artificial commits and a broken intermediate mainline, not smaller PRs.
 
-**Completion criterion:** exactly one slice is selected and on its own branch, sized to a small PR (or explicitly flagged as needing a feature branch/flag).
+The test is mergeability, not count: split while the pieces each leave the mainline working; land them together the moment a split would produce **non-independently-mergeable** pieces. Where even an atomic unit genuinely can't merge partially working, put it behind a **feature branch** (and ideally a feature flag), as the plan noted.
+
+**Completion criterion:** the next unit of work is on its own branch — either one independently mergeable slice, or a set of internal slices taken together as one atomic change — sized to a small PR (or explicitly flagged as needing a feature branch/flag).
 
 ## 3. Build the slice, holding quality in view
 
