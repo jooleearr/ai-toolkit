@@ -41,13 +41,28 @@ If, after this pass, the spec is still too thin to draw sound boundaries, say so
 The first ticket differs by ground:
 
 - **Brownfield** — an existing codebase. Explore it, look for **prefactoring** ("make the change easy, then make the easy change"), and sequence that work first.
-- **Greenfield** — an empty or near-empty repo, the common case for the personal projects and prototypes this skill serves. There is nothing to prefactor. The first ticket is a **walking skeleton**: the thinnest end-to-end path proving the stack is wired together (e.g. one record fetched from the real API and rendered). Everything else blocks on it.
+- **Greenfield** — an empty or near-empty repo, the common case for the personal projects and prototypes this skill serves. There is nothing to prefactor. The first ticket is a **walking skeleton**: the thinnest end-to-end path proving the stack is wired together (e.g. one record fetched from the real API and rendered). Every behavioural ticket blocks on it — though a foundational ticket (step 4) may precede it, so the skeleton extends a stated convention rather than inventing one.
 
 Get this wrong on a greenfield repo and you emit a "set up the project" ticket followed by horizontal layers — precisely the failure tracer bullets exist to prevent.
 
 **Completion criterion:** the repo is classified greenfield or brownfield, and the opening ticket is a walking skeleton or a prefactoring ticket accordingly.
 
-## 4. Slice into tracer-bullet tickets
+## 4. Offer foundational setup tickets
+
+Behaviour rests on **convention**. Before slicing behaviour, decide whether the project wants **foundational tickets** — cross-cutting scaffolding that establishes and *documents* a decision every later ticket extends: a project-structure layout (e.g. [bulletproof-react](https://github.com/alan2207/bulletproof-react)), a testing framework, linting/formatting/CI, a shared error-handling pattern. Left implicit, the first behavioural slice makes each of these choices by accident and every slice after it inherits an unstated convention — the gap this step closes.
+
+A foundational ticket earns its place only when it establishes a **documented convention** later tickets extend, not a horizontal slice of implementation deferred for its own sake. "Set up the project, then build the layers" is still the antipattern tracer bullets exist to prevent; "agree and document the structure so every vertical slice extends the same layout" is the opposite of it.
+
+Calibrate to the spec, exactly as the gap pass does, and **do not re-litigate what the spec already settled**:
+
+- **Spec mandates it** (names a structure, a test framework, a CI rule) — the decision is made; carry it as a **cross-cutting constraint**, do not ask.
+- **Spec is silent** — ask, **one question at a time**, whether the user wants a convention, testing, or tooling ticket up front. Ask only where the answer changes what the behavioural tickets stand on.
+
+When the user wants them, emit each as a **first-class ticket on the frontier**, and give every behavioural ticket that relies on it a **blocking edge** back to it — including the walking skeleton, which then extends a stated layout instead of inventing one.
+
+**Completion criterion:** for each of structure, testing, and tooling, the spec has settled it (carried as a constraint) or the user has been asked and chosen; every wanted foundational ticket exists on the frontier with the dependent behavioural tickets blocked on it.
+
+## 5. Slice into tracer-bullet tickets
 
 Slice by **demoable user-visible behaviour**, never by the spec's own headings — a spec's structure is usually a poor ticket boundary (a "Part" with five requirements is too big for one ticket; a "loading and error states" line is a property of every ticket, not a ticket of its own). Hold each ticket to the tracer-bullet shape:
 
@@ -65,13 +80,13 @@ Then bind the slices to the whole spec:
 
 **Completion criterion:** an ordered set of tickets exists; every spec requirement maps to exactly one ticket or a named cross-cutting constraint; every ticket has its blocking edges; non-goals are carried through; and a timeboxed spec stops cleanly at any point in the sequence.
 
-## 5. Quiz the user, then iterate
+## 6. Quiz the user, then iterate
 
 Before publishing anything, walk the user through the proposed breakdown and quiz them: is the granularity too coarse or too fine, are the blocking edges right, is anything worth merging or splitting? Iterate until they approve. Publishing an unreviewed breakdown is the failure mode here.
 
 **Completion criterion:** the user has approved the ticket set — granularity, boundaries, and blocking edges.
 
-## 6. Emit the tickets
+## 7. Emit the tickets
 
 One artifact, two readings — the tickets are identical, only the blocking edges change form. Ask the user which shape they want. Populate every ticket from [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md); do not open the template before this step.
 
