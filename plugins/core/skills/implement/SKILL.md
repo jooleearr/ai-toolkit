@@ -62,7 +62,15 @@ Whatever shortcut, deferral, or debt you took consciously, write it down where t
 
 **Completion criterion:** every trade-off from steps 3–5 is recorded (or you have confirmed there were none).
 
-## 7. Tick the slice, then close the loop
+## 7. Checkpoint: surface the diff, commit on the user's say-so
+
+The commit is a **checkpoint the user owns**, not a step you take on their behalf. Once the slice is built, verified, and reviewed, show the user the change — the diff, or the changed files with a short summary — and **ask before committing**. Default to *not* committing: the slice is left staged for the user to inspect locally, and a commit happens only once they confirm.
+
+The user can **opt into auto-commit for the rest of the session** — a faster loop for those who don't want the prompt. Once they do, commit each subsequent slice as it reaches this checkpoint without re-asking, until they say to stop.
+
+**Completion criterion:** the diff has been surfaced, and the slice is committed only after the user confirmed (or opted into session auto-commit) — never committed by default.
+
+## 8. Tick the slice, then close the loop
 
 Tick the slice on the checklist. **Slices remaining → return to step 2** for the next one; keep the mainline mergeable between them.
 
