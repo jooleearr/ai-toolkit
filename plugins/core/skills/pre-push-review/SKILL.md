@@ -14,7 +14,7 @@ Third skill in the **plan → implement → pre-push review** pipeline. Its inpu
 ## 1. Gather the three inputs
 
 - **The original problem** — the ticket, brief, or bug report. Its **acceptance criteria** are the contract the change must satisfy.
-- **The hand-off doc** — from the [`plan`](../plan/SKILL.md) skill, `.plans/<ticket-id-or-slug>.md` by default (wherever the plan skill wrote it; schema in its [`HANDOFF-TEMPLATE.md`](../plan/HANDOFF-TEMPLATE.md)). It gives you the agreed **scope** and **non-goals**, the **decided vs assumed** split, the **slice checklist**, and any **trade-offs** the implement step recorded in the risks section.
+- **The hand-off doc** — from the [`plan`](../plan/SKILL.md) skill, `docs/plans/<ticket-id-or-slug>.md` by default (wherever the plan skill wrote it; schema in its [`HANDOFF-TEMPLATE.md`](../plan/HANDOFF-TEMPLATE.md)). It gives you the agreed **scope** and **non-goals**, the **decided vs assumed** split, the **slice checklist**, and any **trade-offs** the implement step recorded in the risks section.
 - **The working diff** — the full change under review: committed and uncommitted, measured against the base branch the work will merge into.
 
 If no hand-off doc exists, you can still review against the ticket — but say so, and flag that there was no agreed plan to check scope, non-goals, and assumptions against.
