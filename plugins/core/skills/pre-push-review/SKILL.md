@@ -13,6 +13,8 @@ Third skill in the **plan → implement → pre-push review** pipeline. Its inpu
 
 **Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) builds the change one slice at a time and makes the project's **tests, type checks, and linters** pass — and stops there; it runs **no review**. This skill owns the review in full: the `code-review`/`security-review` correctness and reuse pass (step 2), the Fowler code-smell scan (step 3), and the authoritative verdict against the acceptance criteria, scope, non-goals, and assumptions (steps 4–5). The concerns don't overlap and nothing is reviewed twice — because `implement` reviews nothing, every pass here is the first of its kind over the change.
 
+This skill expects to run with a **fresh/cleared context** — ideally a new session, handed off from `implement` — reading its state from the three shared artefacts below rather than the implementation conversation. That keeps the review independent: unprimed by the mental model of whoever wrote the code.
+
 ## 1. Gather the three inputs
 
 - **The original problem** — the ticket, brief, or bug report. Its **acceptance criteria** are the contract the change must satisfy.
