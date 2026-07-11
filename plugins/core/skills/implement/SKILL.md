@@ -52,9 +52,9 @@ The context that wrote the slice is blind to its own gaps. Get an **independent 
 - **Dispatch the review agents in parallel**, in one turn — [`architecture-reviewer`](../../agents/architecture-reviewer.md), [`test-reviewer`](../../agents/test-reviewer.md), and [`observability-reviewer`](../../agents/observability-reviewer.md). Each reviews only its concern, against the hand-off doc's definition of done, from clean context. Give each the diff, the hand-off doc path, and the slice's intent.
 - **Run the `code-review` (and `simplify`) skill** for the correctness and reuse/cleanup pass on the raw diff — don't re-hunt those here; that is what those skills are for.
 
-Reconcile every finding. Fix the blocking ones on this slice; fold anything genuinely out of scope into a recorded trade-off (step 6) rather than expanding the slice.
+**Reconcile into one ranked list.** The four passes overlap by design — the same defect (say, an unvalidated `res.json() as T` cast at an API boundary) will surface in more than one report. Don't hand the user four separate lists to dedup in their head. Pool every finding, then **collapse near-duplicates**: same defect + same `file:line` + same reason become one entry, keeping the sharpest statement of it and noting it was flagged by more than one pass. Present the result as a **single list ranked most-severe first** — the same dedup discipline `code-review` already applies internally, now extended across all four passes. Fix the blocking entries on this slice; fold anything genuinely out of scope into a recorded trade-off (step 6) rather than expanding the slice.
 
-**Completion criterion:** all four passes have reported, and every blocking finding is either fixed or consciously deferred with a reason.
+**Completion criterion:** all four passes have reported and been pooled into one deduped, severity-ranked findings list — no near-duplicate appears twice — and every blocking entry is either fixed or consciously deferred with a reason.
 
 ## 6. Record trade-offs taken
 
