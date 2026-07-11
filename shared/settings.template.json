@@ -1,5 +1,5 @@
 {
-  "_comment": "ai-toolkit shared Claude Code defaults. Plugins can't ship a permissions block, so install.sh merges this into ~/.claude/settings.json (global) or a project's .claude/settings.json — unioning the allow/ask/deny lists and stripping this comment. Personal overrides go in .claude/settings.local.json (git-ignored). Precedence: deny > ask > allow; local overrides shared.",
+  "_comment": "ai-toolkit shared Claude Code defaults. Plugins can't ship a permissions block, so this is a manual reference: copy the tiers you want into a project's .claude/settings.json. A HUMAN must do this — Claude Code's self-modification guardrail blocks an agent from writing permission rules for you. `./install.sh --settings` will merge this into the current project (or ~/.claude with --global) when a human runs it — unioning the allow/ask/deny lists and stripping this comment. Personal overrides go in .claude/settings.local.json (git-ignored). Precedence: deny > ask > allow; local overrides shared.",
   "permissions": {
     "allow": [
       "Bash(cat:*)",

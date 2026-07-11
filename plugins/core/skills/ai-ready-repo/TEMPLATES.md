@@ -59,6 +59,8 @@ Contract summary: <the one or two rules most often got wrong — the rest lives 
 ## `.claude/settings.json` (committed shared defaults)
 
 Fill `<protected-branch>` and swap the `allow` verify commands for the detected stack.
+**Hand this content to the user to save and commit** — an agent can't write a
+`settings.json` permissions block (self-modification guardrail); see SKILL.md step 4.
 
 ```json
 {
