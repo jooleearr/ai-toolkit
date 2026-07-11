@@ -1,0 +1,40 @@
+name: Bump plugin versions
+
+# Owns plugin versioning so contributors never edit `version` in a PR (which
+# collides across parallel branches). On merge to main, bump each changed
+# plugin's version from the conventional-commit type and commit it back.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+# Serialise so two quick merges don't race on the follow-up push.
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump changed plugin versions
+        id: bump
+        run: .github/scripts/bump-plugin-versions.sh "${{ github.event.before }}" "${{ github.event.after }}"
+
+      - name: Commit and push bump
+        if: steps.bump.outputs.changed == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugins/*/.claude-plugin/plugin.json
+          if ! git diff --cached --quiet; then
+            # [skip ci] + the GITHUB_TOKEN push both stop this from re-triggering.
+            git commit -m "chore(release): bump plugin versions [skip ci]"
+            git push
+          fi

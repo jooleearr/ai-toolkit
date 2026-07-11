@@ -34,8 +34,13 @@ install.sh                         # registers marketplace + merges shared setti
 - **Permissions can't ship in a plugin** — a plugin `settings.json` only honours the
   `agent` and `subagentStatusLine` keys. Default permissions belong in
   `shared/settings.template.json` and are applied by `install.sh`.
-- **Versioning** — bump a plugin's `version` in its `plugin.json` on a meaningful change;
-  otherwise the git commit SHA is used and every commit counts as an update.
+- **Versioning is automated** — the `Bump plugin versions` workflow
+  (`.github/workflows/version-bump.yml`) bumps each changed plugin's `version` on
+  merge to `main` (`feat`/breaking → minor, anything else → patch, per changed
+  plugin). **Don't edit `version` in a PR** — a manual bump collides across parallel
+  branches and CI owns it. Reserve manual edits for deliberate releases (e.g. cutting
+  a plugin's `1.0.0`). Without any bump the git commit SHA is used, so every commit
+  still counts as an update.
 
 ## Common tasks
 
