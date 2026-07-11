@@ -11,6 +11,8 @@ The distinction that defines this skill is **intent over diff**. Generic linters
 
 Third skill in the **plan → implement → pre-push review** pipeline. Its inputs are the same three artefacts the pipeline carries: the **ticket**, the **hand-off doc**, and the **working diff**.
 
+**Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) owns the **per-slice, structural** review — the `architecture-reviewer`, `test-reviewer`, and `observability-reviewer` agents, run while each slice's context is fresh — and produces the acceptance-criteria evidence. This skill owns the **whole-change** review: the single `code-review`/`security-review` correctness pass (step 2), the code-smell scan (step 3), and the authoritative verdict against acceptance criteria, scope, and non-goals (steps 4–5). The two don't re-hunt each other's ground — `implement` doesn't run `code-review` per slice, and this skill audits the criteria evidence rather than re-demonstrating it.
+
 ## 1. Gather the three inputs
 
 - **The original problem** — the ticket, brief, or bug report. Its **acceptance criteria** are the contract the change must satisfy.
@@ -25,7 +27,9 @@ If no hand-off doc exists, you can still review against the ticket — but say s
 
 Run the `code-review` skill (a Claude Code built-in) for correctness and reuse/cleanup on the raw diff. Where the change touches a security-sensitive surface (auth, secrets, input handling, permissions), run `security-review` too. Fold their output into your report as the correctness and security categories — do **not** re-hunt those defects yourself; that is what those skills are for.
 
-**Completion criterion:** `code-review` has run (and `security-review` where the surface warrants it), and their findings are captured for your report.
+This is the pipeline's **single** correctness/reuse pass, run once over the whole change. When the diff came through the [`implement`](../implement/SKILL.md) skill, its per-slice review was deliberately **structural only** (architecture, tests, observability) and did *not* run `code-review` — so this is the first correctness pass over the change, not a re-run. Review the full diff here regardless of how it was built.
+
+**Completion criterion:** `code-review` has run (and `security-review` where the surface warrants it) over the whole change, and their findings are captured for your report.
 
 ## 3. Scan the diff for code smells
 
@@ -39,7 +43,7 @@ Two rules keep this pass useful rather than noisy, both spelled out in the catal
 
 Walk **each** acceptance criterion from the ticket and decide whether the change demonstrably satisfies it — with evidence, not assertion. A criterion the diff cannot be shown to meet is a **blocking** finding: this is the "solved the wrong problem" class, the most expensive miss and the whole reason this skill exists.
 
-Prefer evidence the implement step already produced (a flow it exercised, output it observed). Where none exists, drive the flow yourself or invoke the `verify` / `run` built-in skills — a green test suite is necessary, not sufficient.
+This is an **audit** of intent, not a re-run of the implementer's own demonstration. When the change came through [`implement`](../implement/SKILL.md), its step 7 already walked the criteria and recorded evidence (flows exercised, output observed) — verify *that* evidence stands up here rather than re-driving every criterion from scratch. Only where evidence is missing or unconvincing do you drive the flow yourself or invoke the `verify` / `run` built-in skills — a green test suite is necessary, not sufficient.
 
 **Completion criterion:** every acceptance criterion is marked met or unmet, each backed by concrete evidence.
 
