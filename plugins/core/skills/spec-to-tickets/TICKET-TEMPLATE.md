@@ -53,7 +53,10 @@ Every spec requirement maps to exactly one ticket, or to a named constraint abov
 **Blocked by:** <ticket ids, or "none — frontier">
 
 **Goal (what & why):** <The user-visible behaviour this delivers and why it matters. One
-demoable unit. No approach, no file paths.>
+demoable unit. No approach, no file paths. For a **foundational ticket**, the "what" is the
+convention it establishes and documents — a project-structure layout, a testing framework,
+tooling — that later tickets extend; its verification is that the convention is documented
+and, where relevant, enforced.>
 
 **In scope**
 - <…>
