@@ -52,14 +52,15 @@ Prove the slice actually works end-to-end before reviewing it. Drive the real fl
 
 ## 5. Review the slice from fresh context
 
-The context that wrote the slice is blind to its own gaps. Get an **independent pass** before the slice is done:
+The context that wrote the slice is blind to its own gaps. Get an **independent, structural pass** before the slice is done:
 
 - **Dispatch the review agents in parallel**, in one turn — [`architecture-reviewer`](../../agents/architecture-reviewer.md), [`test-reviewer`](../../agents/test-reviewer.md), and [`observability-reviewer`](../../agents/observability-reviewer.md). Each reviews only its concern, against the hand-off doc's definition of done, from clean context. Give each the diff, the hand-off doc path, and the slice's intent.
-- **Run the `code-review` (and `simplify`) skill** for the correctness and reuse/cleanup pass on the raw diff — don't re-hunt those here; that is what those skills are for.
 
-Reconcile every finding. Fix the blocking ones on this slice; fold anything genuinely out of scope into a recorded trade-off (step 6) rather than expanding the slice.
+This pass is deliberately **slice-scoped and structural** — the three concerns that are cheapest to fix while the slice's context is still fresh. It does **not** run `code-review`/`simplify` or `security-review`: line-level correctness, reuse/cleanup, and security are a **whole-change** concern owned by [`pre-push-review`](../pre-push-review/SKILL.md) (its step 2), run once over the full diff rather than repeated per slice. Leaving them out here is what keeps this pass fast and stops the same lines being reviewed twice across the pipeline.
 
-**Completion criterion:** all four passes have reported, and every blocking finding is either fixed or consciously deferred with a reason.
+Reconcile the agents' findings into a single list, dropping near-duplicates. Fix the blocking ones on this slice; fold anything genuinely out of scope into a recorded trade-off (step 6) rather than expanding the slice.
+
+**Completion criterion:** the three structural agents have reported, their findings are reconciled, and every blocking finding is either fixed or consciously deferred with a reason.
 
 ## 6. Record trade-offs taken
 
@@ -79,6 +80,19 @@ The user can **opt into auto-commit for the rest of the session** — a faster l
 
 Tick the slice on the checklist. **Slices remaining → return to step 2** for the next one; keep the mainline mergeable between them.
 
-When the last slice is done, **prove the original problem is solved**: walk each **acceptance criterion** from the hand-off doc and show the evidence that it holds — the flow exercised, the output observed. This is the loop closing back to the ticket, and it is the real definition of done. "Tests pass" is not evidence a criterion is met; a demonstrated criterion is.
+When the last slice is done, **prove the original problem is solved**: walk each **acceptance criterion** from the hand-off doc and show the evidence that it holds — the flow exercised, the output observed. This is the loop closing back to the ticket, and it is the real definition of done. "Tests pass" is not evidence a criterion is met; a demonstrated criterion is. **Record this evidence** (in the hand-off doc or the PR description): it is exactly what [`pre-push-review`](../pre-push-review/SKILL.md) step 4 audits, so a criterion you demonstrate here is one it need not re-drive from scratch.
 
-**Completion criterion:** every slice is ticked and every acceptance criterion is demonstrably met with concrete evidence — not just a green suite. Any criterion you can't demonstrate is an open item, surfaced to the user, not a silent gap.
+**Completion criterion:** every slice is ticked and every acceptance criterion is demonstrably met with concrete, recorded evidence — not just a green suite. Any criterion you can't demonstrate is an open item, surfaced to the user, not a silent gap.
+
+## 8. Hand off to pre-push review — or stop
+
+This skill's review pass (step 5) was **structural and per-slice**. The **whole-change** passes — `code-review`/`simplify` for correctness and reuse, `security-review` where the surface warrants it, the Fowler code-smell scan, and the authoritative verdict against acceptance criteria, scope, and non-goals — belong to [`pre-push-review`](../pre-push-review/SKILL.md) and have **not** run yet. Implement doesn't silently roll into them.
+
+So, explicitly **offer the hand-off** rather than assuming it:
+
+- **Proceed into `pre-push-review` now**, carrying the same three artefacts (ticket, hand-off doc, working diff) plus the acceptance-criteria evidence from step 7, so the review runs as part of the flow.
+- **Or stop here** so the user can review separately, later, or by hand.
+
+Default to **asking**, not auto-proceeding. If the user stops, say plainly that the whole-change correctness/reuse/security pass and the acceptance-criteria verdict are still outstanding — so "implement is done" isn't mistaken for "reviewed and ready to push".
+
+**Completion criterion:** the user has been told review is not yet complete and asked whether to hand off to `pre-push-review` or stop; you act on their choice rather than defaulting into or silently skipping the review.
