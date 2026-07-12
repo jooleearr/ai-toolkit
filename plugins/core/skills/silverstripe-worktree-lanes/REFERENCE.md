@@ -95,6 +95,47 @@ is assumed to be `app/_config`; override with `LANE_SS_CONFIG_DIR` if the app mo
 would *restrict* it to just the lane host and break everything else. `create-lane.sh` detects
 `AllowedHostsMiddleware` / `SS_ALLOWED_HOSTS` first and writes nothing when neither is present.
 
+### CMS/admin host-jump — `SS_BASE_URL` pinned per lane
+
+Same class of bug as "Invalid Host", but silent and destructive rather than a visible 400. The
+copied `.env` sets `SS_BASE_URL` to the **main** host, and a very common pattern maps that onto
+the absolute base URL — e.g. in `app/_config.php`:
+
+```php
+if (Environment::getEnv('SS_ENVIRONMENT_TYPE') === 'dev') {
+    Director::config()->set('alternate_base_url', Environment::getEnv('SS_BASE_URL'));
+}
+```
+
+So the CMS builds absolute URLs and redirects against the main host: on a lane, `/admin` 302s to
+`https://<main-host>/admin/pages` and you edit **main-repo** content without noticing. (The
+front-end home renders fine — it is served for the request host; only absolute-URL/redirect paths
+jump. `SS_BASE_URL` also feeds the CSP and the React asset base, so those mis-point too.)
+
+`create-lane.sh` fixes this by pinning `SS_BASE_URL` to the lane host, **without editing the
+copied `.env`**. Silverstripe's `.env` loader is non-overloading by default
+(`EnvironmentLoader::loadFile($path, $overload = false)` skips any var already set in the real
+environment), so a DDEV-injected value wins. It goes in the per-lane, untracked
+`.ddev/config.local.yaml` — written *before first boot*, so no restart is needed:
+
+```yaml
+# <lane>/.ddev/config.local.yaml  — written by create-lane.sh, never committed
+name: myapp-wt-a          # local mode only; drop-name derives the name from the dir
+web_environment:
+  - SS_BASE_URL=https://myapp-wt-a.ddev.site
+```
+
+Unlike the AllowedHosts fragment, this is safe as an **unconditional** default: if the project
+uses `SS_BASE_URL` it fixes the host-jump; if it doesn't, the var is simply unread. And
+`https://<lane-host>` is exactly what Silverstripe would derive from the request host anyway, so
+it can't be wrong. Both modes write it (the host-jump happens regardless of how the project name
+is pinned); in `drop-name` mode the file carries only the `web_environment:` block, no `name:`.
+`reset-lane.sh` needs no change — `config.local.yaml` persists across a reset, so the pin stays
+applied.
+
+**Acceptance:** on a lane, `/admin` (and any absolute-URL/redirect path) stays on the lane host,
+never the main host.
+
 ### `.worktreeinclude`
 
 `git worktree add` copies only tracked files, so each lane starts without `.env` and secrets.
