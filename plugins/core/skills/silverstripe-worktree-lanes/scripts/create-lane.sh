@@ -3,40 +3,56 @@
 # own isolated DDEV project (web + db container), a seeded database, and a built
 # Silverstripe schema. Expensive setup is paid once here, then amortised across
 # many tasks by reset-lane.sh.
+#
+# Default mode is LOCAL-ONLY: the committed .ddev/config.yaml is left untouched so
+# the main checkout's URL stays load-bearing (Auth0 callbacks, CSP, Playwright).
+# Each lane pins its own project name via an UNTRACKED .ddev/config.local.yaml, so
+# nothing lands on the shared branch and teammates are unaffected. Pass
+# --mode drop-name for the alternative that derives the name from the directory
+# (requires name: removed from the committed config — see REFERENCE.md).
 set -euo pipefail
 
 usage() {
   cat <<'EOF'
 Usage: create-lane.sh <lane> [--base <ref>] [--db <dump.sql.gz>] [--root <dir>]
+                              [--mode local|drop-name]
 
-  <lane>         Short lane id, e.g. "a". Becomes worktree dir "<repo>-wt-<lane>"
-                 and — because .ddev/config.yaml has no name: — the DDEV project
-                 of the same name.
-  --base <ref>   Base ref to start the lane from        (default: origin/main).
-  --db <file>    Canonical DB dump to import            (default: $LANE_DB_DUMP,
+  <lane>         Short lane id, e.g. "a". Becomes worktree dir "<repo>-wt-<lane>".
+  --base <ref>   Base ref to start the lane from    (default: origin's default branch).
+  --db <file>    Canonical DB dump to import        (default: $LANE_DB_DUMP,
                  else db.sql.gz at the repo root).
-  --root <dir>   Parent dir to create the worktree in   (default: alongside repo).
+  --root <dir>   Parent dir to create the worktree in (default: alongside repo).
+  --mode <m>     local     (default) keep committed name:, pin per-lane project via
+                           an untracked .ddev/config.local.yaml. Zero shared footprint.
+                 drop-name derive the project from the directory name; requires
+                           name: removed from the committed .ddev/config.yaml.
 
 Environment overrides:
   LANE_DB_DUMP        default canonical dump path
   LANE_SAKE           sake invocation (default: vendor/bin/sake)
+  LANE_SS_CONFIG_DIR  Silverstripe app config dir (default: app/_config)
+  LANE_FLUSH_HOST     host used to flush the web process (default: <canonical>.ddev.site)
 EOF
 }
 
 [[ $# -ge 1 ]] || { usage; exit 1; }
 lane="$1"; shift
-base="origin/main"
+base=""
 db="${LANE_DB_DUMP:-}"
 root=""
+mode="local"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --base) base="$2"; shift 2 ;;
     --db)   db="$2";   shift 2 ;;
     --root) root="$2"; shift 2 ;;
+    --mode) mode="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage; exit 1 ;;
   esac
 done
+[[ "$mode" == "local" || "$mode" == "drop-name" ]] || {
+  echo "error: --mode must be 'local' or 'drop-name' (got '$mode')." >&2; exit 1; }
 
 repo_root="$(git rev-parse --show-toplevel)"
 repo_name="$(basename "$repo_root")"
@@ -45,23 +61,55 @@ lane_dir="$root/${repo_name}-wt-${lane}"
 lane_branch="wt/${lane}"
 db="${db:-$repo_root/db.sql.gz}"
 sake="${LANE_SAKE:-vendor/bin/sake}"
+ss_config_dir="${LANE_SS_CONFIG_DIR:-app/_config}"
 
-# A committed name: in .ddev/config.yaml pins every worktree to the same DDEV
-# project — lanes then collide. Deriving the name from the directory is what
-# makes lanes isolated, so refuse to proceed until it is removed.
-if grep -qE '^\s*name:' "$repo_root/.ddev/config.yaml" 2>/dev/null; then
-  echo "error: .ddev/config.yaml still sets 'name:' — remove it so DDEV derives" >&2
-  echo "       the project name per worktree. See REFERENCE.md > DDEV config." >&2
-  exit 1
+# Default the base to origin's own default branch rather than assuming main —
+# plenty of Silverstripe projects integrate on develop.
+if [[ -z "$base" ]]; then
+  default_branch="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || true)"
+  base="origin/${default_branch:-main}"
 fi
 
-echo "==> Creating lane '${lane}' at ${lane_dir} (base ${base}, project ${repo_name}-wt-${lane})"
+# Read the canonical DDEV project name from the committed config. In local mode it
+# stays pinned there; if absent (DDEV would derive it from the dir), fall back to
+# the repo dir name. Used to name each lane and to pick the web-flush host.
+canonical="$(sed -nE 's/^[[:space:]]*name:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' "$repo_root/.ddev/config.yaml" 2>/dev/null | head -1)"
+canonical="${canonical:-$repo_name}"
+
+if [[ "$mode" == "drop-name" ]]; then
+  # drop-name relies on DDEV deriving the project from the directory, so a committed
+  # name: would pin every worktree to the same project — lanes then collide.
+  if grep -qE '^\s*name:' "$repo_root/.ddev/config.yaml" 2>/dev/null; then
+    echo "error: --mode drop-name needs 'name:' removed from .ddev/config.yaml so DDEV" >&2
+    echo "       derives the project per worktree. Remove it, or use --mode local." >&2
+    exit 1
+  fi
+  project="${repo_name}-wt-${lane}"
+else
+  project="${canonical}-wt-${lane}"
+fi
+flush_host="${LANE_FLUSH_HOST:-${canonical}.ddev.site}"
+
+[[ -d "$lane_dir" ]] && { echo "error: $lane_dir already exists." >&2; exit 1; }
+
+echo "==> Creating lane '${lane}' at ${lane_dir} (base ${base}, project ${project}, mode ${mode})"
 git fetch origin --quiet || true
 git worktree add -b "$lane_branch" "$lane_dir" "$base"
+
+# In local mode, pin this lane's DDEV project name via an untracked local override.
+# DDEV already gitignores config.local.y*ml, so this never touches the shared branch.
+if [[ "$mode" == "local" ]]; then
+  cat > "$lane_dir/.ddev/config.local.yaml" <<EOF
+# Local-only DDEV override for worktree lane '${lane}' — NOT committed.
+name: ${project}
+EOF
+  echo "    pinned DDEV project via .ddev/config.local.yaml"
+fi
 
 # Copy the untracked files each lane needs (.env, secrets). git worktree does not
 # copy untracked files; .worktreeinclude lists them so the same file drives both
 # these scripts and Claude Code's native worktree support.
+lane_env="$lane_dir/.env"
 include_file="$repo_root/.worktreeinclude"
 if [[ -f "$include_file" ]]; then
   while IFS= read -r rel; do
@@ -73,8 +121,48 @@ if [[ -f "$include_file" ]]; then
     fi
   done < "$include_file"
 elif [[ -f "$repo_root/.env" ]]; then
-  cp -a "$repo_root/.env" "$lane_dir/.env"
+  cp -a "$repo_root/.env" "$lane_env"
   echo "    copied .env (no .worktreeinclude found)"
+fi
+
+# Silverstripe host allow-listing: if the project restricts hosts (AllowedHostsMiddleware
+# or SS_ALLOWED_HOSTS), a fresh lane's own host is not whitelisted, so every request 400s
+# "Invalid Host". Add the lane host BEFORE first boot so the initial config-manifest build
+# already includes it. Only do this when the project actually restricts hosts — an empty
+# AllowedHosts means "allow all", and writing a fragment would *restrict* it to the lane
+# host and break the lane.
+uses_env_hosts=0; uses_yaml_hosts=0
+[[ -f "$lane_env" ]] && grep -qsE '^SS_ALLOWED_HOSTS=' "$lane_env" && uses_env_hosts=1
+git -C "$repo_root" grep -qsIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && uses_yaml_hosts=1
+
+restricts_hosts=0
+if [[ "$uses_env_hosts" -eq 1 ]]; then
+  # Append the lane host to the copied .env's SS_ALLOWED_HOSTS (comma-separated).
+  restricts_hosts=1
+  cur="$(grep -E '^SS_ALLOWED_HOSTS=' "$lane_env" | head -1 | cut -d= -f2-)"
+  cur="${cur%\"}"; cur="${cur#\"}"
+  new="${cur:+${cur},}${project}.ddev.site"
+  tmp="$(mktemp)"
+  grep -vE '^SS_ALLOWED_HOSTS=' "$lane_env" > "$tmp" || true
+  echo "SS_ALLOWED_HOSTS=\"${new}\"" >> "$tmp"
+  mv "$tmp" "$lane_env"
+  echo "    added ${project}.ddev.site to SS_ALLOWED_HOSTS in .env"
+elif [[ "$uses_yaml_hosts" -eq 1 ]]; then
+  # Silverstripe's Config merges arrays across fragments, so listing just the lane host
+  # here is additive — the committed AllowedHosts entries are preserved.
+  restricts_hosts=1
+  mkdir -p "$lane_dir/$ss_config_dir"
+  cat > "$lane_dir/$ss_config_dir/lane-local.yml" <<EOF
+---
+Name: lane-local-allowedhosts
+---
+SilverStripe\\Core\\Injector\\Injector:
+  SilverStripe\\Control\\Middleware\\AllowedHostsMiddleware:
+    properties:
+      AllowedHosts:
+        - '${project}.ddev.site'
+EOF
+  echo "    wrote $ss_config_dir/lane-local.yml (whitelists ${project}.ddev.site)"
 fi
 
 cd "$lane_dir"
@@ -91,5 +179,11 @@ fi
 echo "==> dev/build (once per lane)"
 ddev exec "$sake" dev/build flush=1
 
-url="$(ddev describe -j 2>/dev/null | grep -oE 'https://[a-z0-9.-]+\.ddev\.site' | head -1 || true)"
-echo "==> Lane '${lane}' ready${url:+ at ${url}}"
+# Belt-and-braces: force the WEB process (php-fpm) to rebuild its config manifest.
+# A CLI `sake flush` only refreshes the CLI process's manifest; php-fpm can keep
+# serving a stale one. Flush THROUGH the web process via a host already whitelisted.
+if [[ "$restricts_hosts" -eq 1 ]]; then
+  ddev exec "curl -s -o /dev/null -H 'Host: ${flush_host}' 'http://localhost/?flush=1'" || true
+fi
+
+echo "==> Lane '${lane}' ready at https://${project}.ddev.site"

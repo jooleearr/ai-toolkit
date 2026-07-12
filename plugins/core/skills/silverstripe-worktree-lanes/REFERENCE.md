@@ -21,10 +21,33 @@ The tempting shortcuts are both wrong here:
 
 ## One-off repo setup
 
-### DDEV config — drop `name:`
+### DDEV project name — local-only (default) vs drop-name
 
-DDEV derives the project name from the directory *only if* `.ddev/config.yaml` does not pin one.
-Remove the `name:` line from the committed config:
+Each lane needs its **own** DDEV project name (and therefore its own `*.ddev.site` host), or
+worktrees collide on one project. There are two ways to get there; `create-lane.sh` defaults to
+the first and offers the second via `--mode drop-name`.
+
+**Local-only (default, `--mode local`) — recommended.** Leave the committed `.ddev/config.yaml`
+untouched, keeping its `name:`. `create-lane.sh` writes an **untracked**
+`.ddev/config.local.yaml` into each lane pinning that lane's name (DDEV already gitignores
+`config.local.y*ml`, and its override wins over `config.yaml`):
+
+```yaml
+# <lane>/.ddev/config.local.yaml  — written by create-lane.sh, never committed
+name: myapp-wt-a
+```
+
+Why this is the default: a project's `name:` is usually **load-bearing** — the derived host
+(`myapp.ddev.site`) is baked into Auth0 callback URLs, the CSP / `SecurityHeaders` middleware,
+`security.yml`, `playwright.config.ts`, and more. Dropping `name:` renames the *main* checkout's
+URL and quietly breaks local auth and the E2E suite; worse, it's a change to a **committed,
+shared** file, so every teammate then needs their own local override or their URL breaks on the
+next pull. Local-only keeps the main checkout's host exactly as-is and puts **zero footprint on
+the shared branch**. Note the DDEV project name is decoupled from the worktree **directory** name
+— the dir can be `myapp-wt-a/` while the project/URL is `<canonical>-wt-a`.
+
+**drop-name (`--mode drop-name`) — the alternative.** DDEV derives the project name from the
+directory *only if* `.ddev/config.yaml` does not pin one. Remove the `name:` line:
 
 ```yaml
 # .ddev/config.yaml
@@ -34,9 +57,43 @@ php_version: "8.3"
 # ...rest unchanged
 ```
 
-Now `myapp-wt-a/` starts as project `myapp-wt-a`, `myapp-wt-b/` as `myapp-wt-b`, no collisions.
-(Alternative: keep `name:` and add a gitignored `.ddev/config.local.yaml` per lane overriding
-it — more per-lane fiddling, so prefer dropping `name:`.)
+Now `myapp-wt-a/` starts as project `myapp-wt-a`. Use this only when the project name is *not*
+load-bearing and you're happy to change the committed config. `create-lane.sh --mode drop-name`
+refuses to run until `name:` is removed.
+
+### Host allow-listing — the "Invalid Host" 400
+
+Silverstripe's `AllowedHostsMiddleware` (via `SS_ALLOWED_HOSTS` or a YAML list) whitelists
+specific hosts. A freshly-created lane looks healthy (`ddev describe` is green) but **every
+request returns HTTP 400 "Invalid Host"**, because the lane's own `…-wt-a.ddev.site` host isn't
+on the list. `create-lane.sh` handles this automatically when it detects host restriction:
+
+- **YAML projects** — it writes an untracked `app/_config/lane-local.yml` adding the lane host.
+  Silverstripe's Config **merges** arrays across fragments, so only the lane host is listed and
+  the committed entries are preserved:
+
+  ```yaml
+  ---
+  Name: lane-local-allowedhosts
+  ---
+  SilverStripe\Core\Injector\Injector:
+    SilverStripe\Control\Middleware\AllowedHostsMiddleware:
+      properties:
+        AllowedHosts:
+          - 'myapp-wt-a.ddev.site'
+  ```
+
+- **`.env` projects** — where the allow-list lives in `SS_ALLOWED_HOSTS` in `.env`, it appends
+  the lane host to the lane's copied `.env` value instead.
+
+The fragment is written **before first boot**, so the initial config-manifest build already
+includes the host and the lane serves 200 on the first request — no flush dance. The config dir
+is assumed to be `app/_config`; override with `LANE_SS_CONFIG_DIR` if the app module differs.
+
+**Only when hosts are actually restricted.** If a project doesn't whitelist hosts (an empty
+`AllowedHosts` means "allow all"), writing a fragment that sets `AllowedHosts: ['<lane-host>']`
+would *restrict* it to just the lane host and break everything else. `create-lane.sh` detects
+`AllowedHostsMiddleware` / `SS_ALLOWED_HOSTS` first and writes nothing when neither is present.
 
 ### `.worktreeinclude`
 
@@ -53,12 +110,25 @@ Code's native `--worktree` support reads the same file.
 Because every lane's DB lives in its own container, the DB name can stay `db` everywhere — so
 the *same* `.env` works in every lane, unmodified.
 
-### `.gitignore`
+### Keeping the lane machinery invisible
+
+The untracked lane files should never show up as changes on the shared branch. DDEV already
+gitignores `.ddev/config.local.y*ml`; add the rest to `.git/info/exclude` (a local, uncommitted
+ignore file — no shared-branch footprint), or to `.gitignore` if you're happy committing it:
 
 ```
+# .git/info/exclude — local, not shared
 .claude/worktrees/
-.ddev/config.local.yaml
+app/_config/lane-local.yml
+.worktreeinclude
+db.sql.gz
 ```
+
+### Base branch
+
+`create-lane.sh` / `reset-lane.sh` default `--base` to origin's own default branch
+(`origin/HEAD`), so a project that integrates on `develop` works without passing `--base`.
+Override per-invocation with `--base origin/<ref>` when you want to branch off something else.
 
 ### Canonical database dump
 
@@ -91,6 +161,19 @@ the canonical content drifts.
   across the canonical dump and every lane's `.ddev/config.yaml`.
 - **One task per lane** — sharing a lane across concurrent tasks reintroduces the schema/DB
   clash the lane model exists to prevent. Reset between tasks; don't interleave them.
+- **Web-vs-CLI config flush** — after adding a host to an *already-running* lane (i.e. on
+  `reset-lane.sh`, which rebuilds over a warm cache), a CLI `sake … dev/build flush=1` only
+  rebuilds the **CLI** process's config manifest; **php-fpm keeps serving its stale one**, so
+  the browser still 400s while the CLI insists the host is allowed. The reliable fix is to flush
+  *through the web process* via a host that's already whitelisted — which is exactly what the
+  scripts do:
+
+  ```bash
+  ddev exec "curl -s -o /dev/null -H 'Host: <canonical>.ddev.site' 'http://localhost/?flush=1'"
+  ```
+
+  `create-lane.sh` avoids the trap entirely by writing the host fragment *before first boot*, so
+  the web flush there is belt-and-braces; on `reset-lane.sh` (warm cache) it is load-bearing.
 
 ## References
 

@@ -10,19 +10,20 @@ usage() {
 Usage: reset-lane.sh <lane> [--base <ref>] [--db <dump.sql.gz>] [--root <dir>] [--force]
 
   <lane>         Short lane id, e.g. "a" (the existing lane to rotate).
-  --base <ref>   Base ref to reset onto              (default: origin/main).
+  --base <ref>   Base ref to reset onto              (default: origin's default branch).
   --db <file>    Canonical DB dump to re-import       (default: $LANE_DB_DUMP,
                  else db.sql.gz at the repo root).
   --root <dir>   Parent dir the worktree lives in     (default: alongside repo).
   --force        Skip the uncommitted/unpushed-work guard.
 
-Environment overrides: LANE_DB_DUMP, LANE_SAKE (default vendor/bin/sake).
+Environment overrides: LANE_DB_DUMP, LANE_SAKE (default vendor/bin/sake),
+LANE_SS_CONFIG_DIR (default app/_config), LANE_FLUSH_HOST.
 EOF
 }
 
 [[ $# -ge 1 ]] || { usage; exit 1; }
 lane="$1"; shift
-base="origin/main"
+base=""
 db="${LANE_DB_DUMP:-}"
 root=""
 force=0
@@ -44,6 +45,21 @@ lane_dir="$root/${repo_name}-wt-${lane}"
 lane_branch="wt/${lane}"
 db="${db:-$repo_root/db.sql.gz}"
 sake="${LANE_SAKE:-vendor/bin/sake}"
+ss_config_dir="${LANE_SS_CONFIG_DIR:-app/_config}"
+
+# Default the base to origin's own default branch rather than assuming main.
+if [[ -z "$base" ]]; then
+  default_branch="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || true)"
+  base="origin/${default_branch:-main}"
+fi
+
+# Web-flush host + whether this project restricts hosts at all (mirrors create-lane).
+canonical="$(sed -nE 's/^[[:space:]]*name:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' "$repo_root/.ddev/config.yaml" 2>/dev/null | head -1)"
+canonical="${canonical:-$repo_name}"
+flush_host="${LANE_FLUSH_HOST:-${canonical}.ddev.site}"
+restricts_hosts=0
+{ [[ -f "$lane_dir/.env" ]] && grep -qsE '^SS_ALLOWED_HOSTS=' "$lane_dir/.env"; } && restricts_hosts=1
+git -C "$repo_root" grep -qsIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && restricts_hosts=1
 
 [[ -d "$lane_dir" ]] || { echo "error: no lane at $lane_dir — create it first." >&2; exit 1; }
 cd "$lane_dir"
@@ -70,7 +86,10 @@ fi
 echo "==> Rotating lane '${lane}' onto ${base}"
 git fetch origin --quiet || true
 git switch -C "$lane_branch" "$base"
-git clean -fd
+# Preserve the untracked per-lane machinery across the clean. config.local.yaml is
+# gitignored by DDEV so it survives anyway, but lane-local.yml may not be — exclude
+# both explicitly so a reset never strips the lane's project name or host whitelist.
+git clean -fd -e .ddev/config.local.yaml -e "$ss_config_dir/lane-local.yml"
 
 if [[ -f "$db" ]]; then
   echo "==> Re-importing DB from $db"
@@ -80,4 +99,11 @@ else
 fi
 echo "==> dev/build flush=1"
 ddev exec "$sake" dev/build flush=1
+
+# Reset rebuilds over a WARM cache, so the web process keeps serving its stale config
+# manifest until flushed through the web process itself — here this is load-bearing,
+# not just belt-and-braces. Flush via a host that is already whitelisted.
+if [[ "$restricts_hosts" -eq 1 ]]; then
+  ddev exec "curl -s -o /dev/null -H 'Host: ${flush_host}' 'http://localhost/?flush=1'" || true
+fi
 echo "==> Lane '${lane}' reset onto ${base} and ready"

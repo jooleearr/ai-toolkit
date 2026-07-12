@@ -33,9 +33,14 @@ repo_name="$(basename "$repo_root")"
 root="${root:-$(dirname "$repo_root")}"
 lane_dir="$root/${repo_name}-wt-${lane}"
 lane_branch="wt/${lane}"
-project="${repo_name}-wt-${lane}"
 
 [[ -d "$lane_dir" ]] || { echo "error: no lane at $lane_dir." >&2; exit 1; }
+
+# `ddev delete -Oy` run from inside the lane resolves the project via its own
+# config (config.local.yaml in local mode), so no edit is needed. Read the pinned
+# name only so this message names the right project in both modes.
+project="$(sed -nE 's/^[[:space:]]*name:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/p' "$lane_dir/.ddev/config.local.yaml" 2>/dev/null | head -1)"
+project="${project:-${repo_name}-wt-${lane}}"
 
 if [[ "$force" -ne 1 ]]; then
   if [[ -n "$(git -C "$lane_dir" status --porcelain)" ]]; then
