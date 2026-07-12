@@ -22,8 +22,12 @@ The end-to-end flow is the common case, so `sequenceDiagram` and `flowchart` cov
 - **Plain-language labels** that match the words used in the explanation, so the diagram and the prose reinforce one model.
 - Show only the parts the explanation named; leave the rest out.
 
-## Render it so it displays
+## Render it where the reader can see it
 
-Write the diagram to a `.mmd` file and send it with `SendUserFile` (`display: "render"`) so it renders visually — the reader should see the diagram, not a block of Mermaid source they have to imagine. Put the file in a scratch/temp location, not the user's repo, unless they've asked to keep it.
+A diagram only pays off if the reader sees it *rendered*, not the Mermaid source. A raw ` ```mermaid ` fence renders on some surfaces and lands as an unreadable wall of `flowchart TD` / `-->` syntax on others — so match the delivery to the surface, and treat a raw block dumped where nothing renders it as the failure to avoid, never the goal.
 
-Fallback: if file-send isn't available in the environment, emit a fenced ` ```mermaid ` block inline. Many surfaces render it; a raw block is still the last resort, never the goal.
+- **Terminal (assume this by default for a CLI).** Nothing renders inline here, so write the diagram to a file in the project's ephemeral scratch directory and point the reader at the path — they open it in an editor's Mermaid preview. Discover where ephemeral files go rather than assuming: prefer an existing gitignored scratch dir (check `.gitignore` for `.scratch/`, `tmp/`, `scratch/`); fall back to `.scratch/` (add it to `.gitignore` if absent). Name the file for the concept: `.scratch/<concept>-diagram.mmd`.
+- **A surface that previews a sent file** (an app/side-panel that renders attachments). Write the `.mmd` and send it with `SendUserFile` (`display: "render"`).
+- **A surface that renders Mermaid inline** (an artifact, a chat UI with Mermaid support). Emit a fenced ` ```mermaid ` block — it renders in place.
+
+Whichever path fits, always name the file path or point at the rendered diagram in your reply, so it's discoverable.
