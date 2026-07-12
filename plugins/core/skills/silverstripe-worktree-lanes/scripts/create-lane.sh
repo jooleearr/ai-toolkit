@@ -96,14 +96,29 @@ echo "==> Creating lane '${lane}' at ${lane_dir} (base ${base}, project ${projec
 git fetch origin --quiet || true
 git worktree add -b "$lane_branch" "$lane_dir" "$base"
 
-# In local mode, pin this lane's DDEV project name via an untracked local override.
+# Pin this lane's per-lane DDEV settings via an UNTRACKED .ddev/config.local.yaml.
 # DDEV already gitignores config.local.y*ml, so this never touches the shared branch.
+# Two things live here, both needed BEFORE first boot:
+#   1. (local mode only) the lane's DDEV project name — drop-name instead derives it
+#      from the directory, so it must NOT pin a name: here.
+#   2. SS_BASE_URL, pinned to the lane host (both modes). The copied .env sets
+#      SS_BASE_URL to the *main* host; a common Director::alternate_base_url mapping
+#      then makes the CMS/admin build absolute URLs and redirects against the main
+#      checkout — so /admin on a lane silently jumps to (and edits) main. Silverstripe's
+#      .env loader is non-overloading, so this DDEV-injected value wins over the copied
+#      .env without editing that secret-bearing file. Unconditional and safe: if the
+#      project ignores SS_BASE_URL the var is simply unread, and https://<lane-host> is
+#      exactly what SS would derive from the request host anyway.
+{
+  echo "# Local-only DDEV override for worktree lane '${lane}' — NOT committed."
+  [[ "$mode" == "local" ]] && echo "name: ${project}"
+  echo "web_environment:"
+  echo "  - SS_BASE_URL=https://${project}.ddev.site"
+} > "$lane_dir/.ddev/config.local.yaml"
 if [[ "$mode" == "local" ]]; then
-  cat > "$lane_dir/.ddev/config.local.yaml" <<EOF
-# Local-only DDEV override for worktree lane '${lane}' — NOT committed.
-name: ${project}
-EOF
-  echo "    pinned DDEV project via .ddev/config.local.yaml"
+  echo "    wrote .ddev/config.local.yaml (pins project name + SS_BASE_URL=https://${project}.ddev.site)"
+else
+  echo "    wrote .ddev/config.local.yaml (pins SS_BASE_URL=https://${project}.ddev.site)"
 fi
 
 # Copy the untracked files each lane needs (.env, secrets). git worktree does not

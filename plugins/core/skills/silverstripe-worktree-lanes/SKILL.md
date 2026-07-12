@@ -51,6 +51,13 @@ What the scripts handle for you, so you don't have to edit shared files:
 - **Host allow-listing** — projects that restrict hosts (`AllowedHostsMiddleware` or
   `SS_ALLOWED_HOSTS`) otherwise 400 "Invalid Host" on a fresh lane. `create-lane.sh` adds the
   lane's own host *before first boot*, so the lane serves 200 on the first request.
+- **CMS/admin host-jump** — the copied `.env` pins `SS_BASE_URL` to the *main* host, so (via the
+  common `Director::alternate_base_url` mapping) `/admin` and any absolute-URL/redirect path on a
+  lane silently jumps to the main checkout — you edit main-repo content without noticing.
+  `create-lane.sh` pins `SS_BASE_URL` to the lane host per lane, via `web_environment` in the
+  untracked `.ddev/config.local.yaml` (Silverstripe's non-overloading `.env` loader lets the
+  DDEV-injected value win without touching the secret-bearing `.env`). Acceptance: on a lane,
+  `/admin` and any absolute-URL/redirect path stays on the lane host, never the main host.
 - **Base branch** — defaults to origin's own default branch (so `develop`-based projects work
   without `--base`).
 
