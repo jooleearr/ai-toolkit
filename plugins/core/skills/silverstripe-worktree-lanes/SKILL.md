@@ -28,24 +28,37 @@ juggling. Never point two lanes at one database.
 
 ## Prerequisites (once per repo)
 
-Before the first lane, the repo must be prepared so DDEV derives a unique project name per
-worktree and each lane gets its env files. If these are not in place, do them first —
-[`REFERENCE.md`](REFERENCE.md) has the exact edits and templates:
+The default **local-only** mode is designed to just work on the common Silverstripe shape with
+**no committed changes** — the scripts pin each lane's DDEV project and whitelist its host
+through untracked local files. Only a couple of things are worth setting up first;
+[`REFERENCE.md`](REFERENCE.md) has the exact templates:
 
-1. **Remove `name:` from `.ddev/config.yaml`** so DDEV names the project after the directory
-   (`myapp-wt-a/` → project `myapp-wt-a`). `create-lane.sh` refuses to run until this is done.
-2. **Add a `.worktreeinclude`** listing the untracked files each lane needs (`.env`, secrets).
+1. **Add a `.worktreeinclude`** listing the untracked files each lane needs (`.env`, secrets).
    The scripts copy these into every new lane, and Claude Code's native worktrees honour the
    same file.
-3. **Gitignore** the lane machinery (`.claude/worktrees/`, `.ddev/config.local.yaml`).
-4. **Keep one canonical `db.sql.gz`** the scripts import per lane (default: repo-root
+2. **Keep one canonical `db.sql.gz`** the scripts import per lane (default: repo-root
    `db.sql.gz`, or set `LANE_DB_DUMP`).
+3. *(optional)* **Gitignore the lane machinery** so it stays invisible to `git status`.
+   DDEV already gitignores `.ddev/config.local.yaml`; add `app/_config/lane-local.yml`,
+   `.worktreeinclude`, and (if not already) `db.sql.gz` to `.git/info/exclude`.
+
+What the scripts handle for you, so you don't have to edit shared files:
+
+- **Per-lane DDEV project name** — the committed `.ddev/config.yaml` is left untouched (its
+  `name:` is often load-bearing for Auth0 callbacks, CSP, and Playwright). Each lane writes an
+  untracked `.ddev/config.local.yaml` pinning its own name/URL. Prefer this default; the older
+  "drop `name:` and derive from the directory" behaviour is still available via `--mode drop-name`.
+- **Host allow-listing** — projects that restrict hosts (`AllowedHostsMiddleware` or
+  `SS_ALLOWED_HOSTS`) otherwise 400 "Invalid Host" on a fresh lane. `create-lane.sh` adds the
+  lane's own host *before first boot*, so the lane serves 200 on the first request.
+- **Base branch** — defaults to origin's own default branch (so `develop`-based projects work
+  without `--base`).
 
 ## Steps
 
-1. **Confirm the prerequisites above are met.** Check `.ddev/config.yaml` has no `name:`, a
-   `.worktreeinclude` exists, and a canonical DB dump is reachable. Fix any gap using
-   `REFERENCE.md` before creating a lane — done when all four hold.
+1. **Confirm the prerequisites above are met.** Check a `.worktreeinclude` exists and a
+   canonical DB dump is reachable. Fix any gap using `REFERENCE.md` before creating a lane —
+   local mode needs no `.ddev/config.yaml` edit.
 2. **Create or reset the lane.** For a brand-new slot run `scripts/create-lane.sh <lane>
    [--base <ref>] [--db <dump>]`. For an existing slot starting a new task run
    `scripts/reset-lane.sh <lane> [--base <ref>]` — it guards against discarding uncommitted or
