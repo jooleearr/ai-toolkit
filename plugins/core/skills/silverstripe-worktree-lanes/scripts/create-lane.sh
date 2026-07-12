@@ -185,6 +185,16 @@ echo "==> ddev start"
 ddev start
 echo "==> ddev composer install (shared global cache — network-free after first lane)"
 ddev composer install
+# Frontend deps: only on projects that have a package.json (many SS projects are
+# backend-only). DDEV shares an npm cache across projects, so this is network-cheap
+# after the first lane. PUPPETEER_SKIP_DOWNLOAD guards the common arm64 failure: a
+# transitive dep (e.g. mdpdf -> puppeteer) tries to fetch a Chromium binary that has
+# no arm64 build, and lanes almost always run on M-series laptops. The skipped binary
+# backs docs-to-PDF paths, not the dev servers; Playwright browsers live host-side.
+if [[ -f package.json ]]; then
+  echo "==> ddev npm install (shared npm cache — network-cheap after first lane)"
+  ddev exec bash -c "PUPPETEER_SKIP_DOWNLOAD=true npm install"
+fi
 if [[ -f "$db" ]]; then
   echo "==> ddev import-db --file=$db"
   ddev import-db --file="$db"

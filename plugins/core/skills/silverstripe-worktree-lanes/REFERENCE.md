@@ -181,6 +181,7 @@ the canonical content drifts.
 | `composer install` (large vendor) | `ddev composer install` shares a global Composer cache across all DDEV projects → network-free after the first lane. Don't symlink `vendor/` across branches — different branches need different dependencies. |
 | Content database | One canonical `db.sql.gz`; `ddev import-db --file=…` per lane. |
 | `dev/build` | Run once per lane after import (create-lane), and again only on reset. The main reason lanes are long-running: you pay it per *lane*, not per *task*. |
+| `npm install` (frontend build) | `create-lane.sh` runs `ddev npm install` only when the lane has a `package.json`; DDEV shares an npm cache across projects → network-cheap after the first lane. It sets `PUPPETEER_SKIP_DOWNLOAD=true` for the install so a transitive puppeteer dep doesn't abort fetching a non-existent arm64 Chromium binary (see gotchas). |
 
 ## Gotchas
 
@@ -209,6 +210,19 @@ the canonical content drifts.
 
   `create-lane.sh` avoids the trap entirely by writing the host fragment *before first boot*, so
   the web flush there is belt-and-braces; on `reset-lane.sh` (warm cache) it is load-bearing.
+- **arm64 `npm install` fails on transitive puppeteer** — on Apple silicon a plain
+  `ddev npm install` can abort with `The chromium binary is not available for arm64` when a
+  transitive dep (e.g. `mdpdf` → `puppeteer`) tries to download a Chromium binary with no arm64
+  build. `create-lane.sh` sets `PUPPETEER_SKIP_DOWNLOAD=true` for the install to sidestep this;
+  if you ever install by hand, do the same: `ddev exec bash -c "PUPPETEER_SKIP_DOWNLOAD=true npm
+  install"`. The skipped binary only backs docs-to-PDF paths, not the dev servers, and
+  Playwright browsers live host-side anyway.
+- **Fixed Vite host port needs no per-lane juggling** — even when a project pins Vite to a
+  *fixed* host port via `web_extra_exposed_ports` (e.g. `5173`) and every lane shares the
+  identical committed config, there is no port clash: ddev-router multiplexes the fixed host
+  port **by hostname**, so each lane's Vite is served at its own `<project>.ddev.site:<port>`
+  (a lane with no dev server running just 502s there). Don't bother varying the Vite port per
+  lane — the "no manual port juggling" isolation holds for fixed exposed ports too.
 
 ## References
 
