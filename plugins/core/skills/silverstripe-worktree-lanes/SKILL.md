@@ -42,24 +42,10 @@ through untracked local files. Only a couple of things are worth setting up firs
    DDEV already gitignores `.ddev/config.local.yaml`; add `app/_config/lane-local.yml`,
    `.worktreeinclude`, and (if not already) `db.sql.gz` to `.git/info/exclude`.
 
-What the scripts handle for you, so you don't have to edit shared files:
-
-- **Per-lane DDEV project name** — the committed `.ddev/config.yaml` is left untouched (its
-  `name:` is often load-bearing for Auth0 callbacks, CSP, and Playwright). Each lane writes an
-  untracked `.ddev/config.local.yaml` pinning its own name/URL. Prefer this default; the older
-  "drop `name:` and derive from the directory" behaviour is still available via `--mode drop-name`.
-- **Host allow-listing** — projects that restrict hosts (`AllowedHostsMiddleware` or
-  `SS_ALLOWED_HOSTS`) otherwise 400 "Invalid Host" on a fresh lane. `create-lane.sh` adds the
-  lane's own host *before first boot*, so the lane serves 200 on the first request.
-- **CMS/admin host-jump** — the copied `.env` pins `SS_BASE_URL` to the *main* host, so (via the
-  common `Director::alternate_base_url` mapping) `/admin` and any absolute-URL/redirect path on a
-  lane silently jumps to the main checkout — you edit main-repo content without noticing.
-  `create-lane.sh` pins `SS_BASE_URL` to the lane host per lane, via `web_environment` in the
-  untracked `.ddev/config.local.yaml` (Silverstripe's non-overloading `.env` loader lets the
-  DDEV-injected value win without touching the secret-bearing `.env`). Acceptance: on a lane,
-  `/admin` and any absolute-URL/redirect path stays on the lane host, never the main host.
-- **Base branch** — defaults to origin's own default branch (so `develop`-based projects work
-  without `--base`).
+The scripts defuse three Silverstripe-specific traps for you — the per-lane DDEV project name,
+the `AllowedHosts` 400, and the `/admin` host-jump — and default `--base` to origin's own default
+branch. Read the matching section of [`REFERENCE.md`](REFERENCE.md) when a lane misbehaves, not
+before; `--mode drop-name` and the rationale for each trap live there.
 
 ## Steps
 
@@ -69,8 +55,9 @@ What the scripts handle for you, so you don't have to edit shared files:
 2. **Create or reset the lane.** For a brand-new slot run `scripts/create-lane.sh <lane>
    [--base <ref>] [--db <dump>]`. For an existing slot starting a new task run
    `scripts/reset-lane.sh <lane> [--base <ref>]` — it guards against discarding uncommitted or
-   unpushed work. Done when the script reports the lane ready and `ddev describe` shows the
-   project running.
+   unpushed work. Done when the script reports the lane ready, `ddev describe` shows the project
+   running, and the lane's own host serves the site — including `/admin`, which must stay on the
+   lane host, never the main one.
 3. **Work in the lane, one task per lane.** Keep each lane scoped to a single task so its
    branch, DB state, and containers stay coherent; start the next task by resetting the lane,
    not by piling a second task into it.

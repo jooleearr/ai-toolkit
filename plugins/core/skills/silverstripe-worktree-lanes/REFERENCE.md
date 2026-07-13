@@ -29,12 +29,15 @@ the first and offers the second via `--mode drop-name`.
 
 **Local-only (default, `--mode local`) — recommended.** Leave the committed `.ddev/config.yaml`
 untouched, keeping its `name:`. `create-lane.sh` writes an **untracked**
-`.ddev/config.local.yaml` into each lane pinning that lane's name (DDEV already gitignores
-`config.local.y*ml`, and its override wins over `config.yaml`):
+`.ddev/config.local.yaml` into each lane (DDEV already gitignores `config.local.y*ml`, and its
+override wins over `config.yaml`). This is the whole file — it pins the lane's project name, and
+the `SS_BASE_URL` explained under "CMS/admin host-jump" below:
 
 ```yaml
 # <lane>/.ddev/config.local.yaml  — written by create-lane.sh, never committed
-name: myapp-wt-a
+name: myapp-wt-a          # local mode only; drop-name derives the name from the dir
+web_environment:
+  - SS_BASE_URL=https://myapp-wt-a.ddev.site
 ```
 
 Why this is the default: a project's `name:` is usually **load-bearing** — the derived host
@@ -115,15 +118,9 @@ jump. `SS_BASE_URL` also feeds the CSP and the React asset base, so those mis-po
 `create-lane.sh` fixes this by pinning `SS_BASE_URL` to the lane host, **without editing the
 copied `.env`**. Silverstripe's `.env` loader is non-overloading by default
 (`EnvironmentLoader::loadFile($path, $overload = false)` skips any var already set in the real
-environment), so a DDEV-injected value wins. It goes in the per-lane, untracked
-`.ddev/config.local.yaml` — written *before first boot*, so no restart is needed:
-
-```yaml
-# <lane>/.ddev/config.local.yaml  — written by create-lane.sh, never committed
-name: myapp-wt-a          # local mode only; drop-name derives the name from the dir
-web_environment:
-  - SS_BASE_URL=https://myapp-wt-a.ddev.site
-```
+environment), so a DDEV-injected value wins. It rides in the `web_environment:` block of the
+per-lane, untracked `.ddev/config.local.yaml` shown above — written *before first boot*, so no
+restart is needed.
 
 Unlike the AllowedHosts fragment, this is safe as an **unconditional** default: if the project
 uses `SS_BASE_URL` it fixes the host-jump; if it doesn't, the var is simply unread. And
@@ -132,9 +129,6 @@ it can't be wrong. Both modes write it (the host-jump happens regardless of how 
 is pinned); in `drop-name` mode the file carries only the `web_environment:` block, no `name:`.
 `reset-lane.sh` needs no change — `config.local.yaml` persists across a reset, so the pin stays
 applied.
-
-**Acceptance:** on a lane, `/admin` (and any absolute-URL/redirect path) stays on the lane host,
-never the main host.
 
 ### `.worktreeinclude`
 
