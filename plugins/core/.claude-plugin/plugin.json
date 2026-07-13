@@ -1,7 +1,7 @@
 {
   "name": "core",
   "description": "Core reusable skills that apply to any project.",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "author": {
     "name": "jooleearr"
   },
