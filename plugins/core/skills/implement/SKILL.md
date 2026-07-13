@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Use when implementing a hand-off doc or plan from the plan skill — turning an agreed plan into working code, one vertical slice at a time, with quality held as a constraint while coding (testing, clean code, architecture, observability) and the project's tests, type checks, and linters made to pass. Second skill in the plan → implement → pre-push review pipeline. Works in small batches, runs no code review itself, and offers to hand the built change to the pre-push-review skill.
+description: Use when implementing a hand-off doc or plan from the plan skill — turning an agreed plan into working code, one vertical slice at a time, with quality held as a constraint while coding and the project's tests, type checks, and linters made to pass. Second skill in the plan → implement → pre-push-review pipeline. Works in small batches, runs no code review itself, and offers to hand the built change to the pre-push-review skill.
 ---
 
 # Implement
@@ -54,13 +54,13 @@ Prove the slice actually works end-to-end before reviewing it. Drive the real fl
 
 Before the slice is done, run the project's own **tests, type checks, and linters** and get them green. These are the automated gates `implement` owns — the fast, deterministic checks that prove the slice is internally sound. A slice that leaves the suite red, the types broken, or the linter complaining is not done.
 
-This skill stops at those gates: it runs **no code review**. Not the `code-review`/`simplify` skills, not `security-review`, and not the `architecture-reviewer`/`test-reviewer`/`observability-reviewer` agents. Code review of every kind — line-level correctness, reuse and cleanup, security, structural fit against the plan, and the acceptance-criteria verdict — is a **whole-change** concern owned by [`pre-push-review`](../pre-push-review/SKILL.md), run once over the full diff rather than repeated per slice. Keeping review out of `implement` is deliberate: the two skills' concerns don't overlap, and no line is reviewed twice across the pipeline.
+This skill stops at those gates: it runs **no code review** — not the `code-review`/`simplify` skills, not `security-review`, not the `architecture-reviewer`/`test-reviewer`/`observability-reviewer` agents. That whole concern belongs to [`pre-push-review`](../pre-push-review/SKILL.md); step 9 states the hand-off, and why review sits there rather than here, in full.
 
 **Completion criterion:** the project's tests, type checks, and linters all pass on the slice; no review has been run here — that is `pre-push-review`'s job.
 
 ## 6. Record trade-offs taken
 
-Whatever shortcut, deferral, or debt you took consciously, write it down where the **pre-push review** skill will see it — a short note in the hand-off doc's risks section (or the PR description). The point is that debt is **visible and owned**, so a reviewer weighs a choice you made on purpose, not one they have to discover.
+Whatever shortcut, deferral, or debt you took consciously, write it down where the **pre-push-review** skill will see it — a short note in the hand-off doc's risks section (or the PR description). The point is that debt is **visible and owned**, so a reviewer weighs a choice you made on purpose, not one they have to discover.
 
 **Completion criterion:** every trade-off from steps 3–5 is recorded (or you have confirmed there were none).
 
@@ -76,11 +76,11 @@ The user can **opt into auto-commit for the rest of the session** — a faster l
 
 Tick the slice on the checklist. **Slices remaining → return to step 2** for the next one; keep the mainline mergeable between them.
 
-When the last slice is done, confirm the whole change still stands up together — tests, type checks, and linters green across the combined slices, not just each in isolation. The plan's **acceptance criteria** told you what to build and are how you knew each slice was aimed right; whether the finished change *demonstrably satisfies* them is a review verdict, and that walk belongs to [`pre-push-review`](../pre-push-review/SKILL.md) (its step 4). Don't run that acceptance-criteria audit here — leaving it to the review is what keeps the criteria from being walked twice across the pipeline.
+When the last slice is done, confirm the whole change still stands up together — tests, type checks, and linters green across the combined slices, not just each in isolation. The plan's **acceptance criteria** told you what to build and are how you knew each slice was aimed right; whether the finished change *demonstrably satisfies* them is a review verdict, and that walk belongs to [`pre-push-review`](../pre-push-review/SKILL.md) (its step 4). Don't run that acceptance-criteria audit here; it belongs to the review (see step 9).
 
 **Completion criterion:** every slice is ticked and the full change passes tests, type checks, and linting together; the acceptance-criteria verdict is left to `pre-push-review`, not duplicated here.
 
-## 9. Hand off to pre-push review — or stop
+## 9. Hand off to pre-push-review — or stop
 
 Implement has built the change and made the automated gates pass, but it has run **no review**. Every review pass — the `code-review`/`simplify` correctness and reuse pass, `security-review` where the surface warrants it, the Fowler code-smell scan, and the authoritative verdict against the acceptance criteria, scope, and non-goals — belongs to [`pre-push-review`](../pre-push-review/SKILL.md) and has **not** run yet. Implement doesn't silently roll into it.
 

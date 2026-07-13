@@ -1,6 +1,6 @@
 ---
 name: hunk-review
-description: Use when the user wants to see a diff or changeset in a terminal viewer, or to work through review comments they left on their changes — phrasings like "open the diff", "show me the changes", "diff this branch against main", "open that in a new pane/tab", "review my comments", "action the comments I left", plus the bare words hunk and herdr. The discoverable front door that loads hunk's own review skill and drives it inside a herdr pane or tab, so both tools work in plain language without recalling their CLIs.
+description: Use when the user wants to see a diff or changeset in a terminal viewer, or to work through review comments they left on their changes — phrasings like "open the diff", "show me the changes", "diff this branch against main", "open that in a new pane/tab", "review my comments", "action the comments I left", plus the bare words hunk and herdr. The discoverable front door that loads hunk's own review skill and drives it inside a herdr pane or tab.
 ---
 
 # Hunk review
