@@ -14,8 +14,8 @@ Outward-facing sibling of [`pre-push-review`](../pre-push-review/SKILL.md). That
 ## 1. Gather the inputs
 
 - **The PR** — a number or URL. Pull its diff, description, commits, and changed-file list (GitHub MCP tools, or `gh pr view` / `gh pr diff`). A PR well past a few hundred lines is itself a finding (step 6) — note the size now.
-- **The Jira ticket** — resolve the key from the branch name (`feature/ABC-123-thing`) or the PR title (`[ABC-123] Thing`). Fetch it via the **Atlassian MCP** if one is connected — summary, description, **acceptance criteria**. If there is no MCP or no ticket reference, say so plainly and review against the PR description instead: don't guess at intent, and don't abort.
-- **The surrounding codebase** — check out the branch (or read the repo at the PR's head). The architecture, over-engineering, and semantic-drift passes need it: a diff alone can't tell you whether an abstraction was warranted or a helper already existed.
+- **The Jira ticket** — resolve the key from the branch name (`feature/ABC-123-thing`) or the PR title (`[ABC-123] Thing`). Fetch it via the **Atlassian MCP** if one is connected — you want only the summary, description, and **acceptance criteria**. Where the tool lets you name fields, request just those: the raw issue payload also carries avatar URLs, project metadata, and rendered HTML that bloat the context for no review value. If there is no MCP or no ticket reference, say so plainly and review against the PR description instead: don't guess at intent, and don't abort.
+- **The surrounding codebase** — check out the branch (or read the repo at the PR's head). The architecture, over-engineering, and semantic-drift passes need it: a diff alone can't tell you whether an abstraction was warranted or a helper already existed. **Read narrowly:** `Grep`/`Glob` to the specific symbol or block a finding turns on — a model's `$db`, the helper you suspect already exists, the caller of a changed function — rather than reading large files end-to-end. And explore this surrounding code **once**: `code-review`'s finders (step 2) already read around the diff, so scope a single exploration here and reuse it across the step 4 passes rather than spawning a second round that re-derives the same facts.
 
 **Completion criterion:** you have the diff, the ticket's acceptance criteria (or an explicit note that there was no ticket to fetch), and access to the surrounding code.
 
@@ -23,7 +23,17 @@ Outward-facing sibling of [`pre-push-review`](../pre-push-review/SKILL.md). That
 
 Run the `code-review` skill (a Claude Code built-in) for correctness and reuse/cleanup on the raw diff. Where the change touches a security-sensitive surface (auth, secrets, input handling, permissions, deserialisation), run `security-review` too. Fold their output into your report as the correctness and security categories — do **not** re-hunt those defects yourself; that is what those skills are for.
 
-**Completion criterion:** `code-review` has run (and `security-review` where the surface warrants it), and their findings are captured for your report.
+**Scale the effort to the diff — this is the single biggest cost lever in the whole review.** At `high`/`max`, `code-review` fans out a fleet of finder and verifier subagents; on a small diff that spend buys nothing a cheaper pass wouldn't also catch. (One measured run burned ~406k subagent tokens — 71% of the entire review — running `high` against a 489-line diff; `medium` would very likely have surfaced the same confirmed defects.) Count the added-plus-deleted lines from the diff you already pulled in step 1 and pick the effort:
+
+| Changed lines | Effort |
+| :--- | :--- |
+| ≲ 500 | `medium` *(default)* |
+| ~500–1500, or a security-critical surface | `high` |
+| > 1500, or a broad/risky refactor | `max` |
+
+These are a default, not a rule: bump up a band when a small diff is dense or touches auth/secrets/PII, and honour an explicit effort the user asks for over the table. On a borderline size, prefer the lower band and only widen if the first pass comes back thin.
+
+**Completion criterion:** `code-review` has run at an effort scaled to the diff size (and `security-review` where the surface warrants it), and their findings are captured for your report.
 
 ## 3. Scan the diff for code smells
 
@@ -35,7 +45,7 @@ The catalogue's two rules keep this pass useful rather than noisy: it is **diff-
 
 ## 4. Run the review passes
 
-Each pass below is **conditional**: run it where it applies, and where it doesn't, say it was **skipped** rather than manufacturing a finding to fill the heading. A pure-backend PR gets no accessibility section.
+Each pass below is **conditional**: run it where it applies, and where it doesn't, say it was **skipped** rather than manufacturing a finding to fill the heading. A pure-backend PR gets no accessibility section. Lean on the single exploration from step 1 and the findings `code-review` already returned in step 2 — don't launch fresh Explore passes here to re-derive facts those already cover; only reach for more reading when a pass turns on something genuinely uncovered.
 
 | Pass | What it asks |
 | :--- | :----------- |
