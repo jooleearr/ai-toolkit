@@ -1,7 +1,7 @@
 # Hand-off doc template
 
 The shared schema for a plan. The **plan** skill writes it; the **implement** and
-**pre-push review** skills consume it, so keep the headings stable. Copy the block
+**pre-push-review** skills consume it, so keep the headings stable. Copy the block
 below into `docs/plans/<ticket-id-or-slug>.md` and fill every section — legible to a human
 reviewer first, downstream skills second.
 

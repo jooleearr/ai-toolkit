@@ -1,11 +1,11 @@
 ---
 name: plan
-description: Use when turning a task — a Jira ticket, Slack thread, bug report, or verbal brief — into an agreed problem statement and a hand-off doc for a later implementation pass. First skill in the plan → implement → review pipeline. Grills the task to shared understanding before writing any plan, then decomposes the work into small vertical slices.
+description: Use when turning a task — a Jira ticket, Slack thread, bug report, or verbal brief — into an agreed problem statement and a hand-off doc for a later implementation pass. First skill in the plan → implement → pre-push-review pipeline. Grills the task to shared understanding before writing any plan, then decomposes the work into small vertical slices.
 ---
 
 # Plan
 
-Turn a task into a **hand-off doc** the **implement** and **pre-push review** skills can execute against. A plan is only as good as the **shared understanding** behind it, so **grill** the task until ambiguity is gone *before* proposing any approach.
+Turn a task into a **hand-off doc** the **implement** and **pre-push-review** skills can execute against. A plan is only as good as the **shared understanding** behind it, so **grill** the task until ambiguity is gone *before* proposing any approach.
 
 The order is a guardrail: agreement on *what* and *why* is a hard gate that comes before *how*. Do not draft the approach, the slices, or the doc until the shared understanding is confirmed.
 

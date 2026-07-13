@@ -1,6 +1,6 @@
 ---
 name: pre-push-review
-description: Use when reviewing a change against its ticket and hand-off doc before pushing or opening a PR — checking it satisfies the acceptance criteria and honours the plan's agreed scope, non-goals, and assumptions, not just that the diff reads cleanly. Third skill in the plan → implement → pre-push review pipeline. Produces categorised, severity-ranked findings in Conventional Comments format with a ready-to-push verdict; delegates pure-diff bug-hunting to the code-review skill and scans the diff for Fowler code smells.
+description: Use when reviewing a change against its ticket and hand-off doc before pushing or opening a PR — checking it satisfies the acceptance criteria and honours the plan's agreed scope, non-goals, and assumptions, not just that the diff reads cleanly. Third skill in the plan → implement → pre-push-review pipeline. Produces categorised, severity-ranked findings in Conventional Comments format with a ready-to-push verdict; delegates pure-diff bug-hunting to the code-review skill and scans the diff for Fowler code smells.
 ---
 
 # Pre-push review
@@ -9,7 +9,7 @@ Review a change the way a diligent colleague would *before* it goes up — again
 
 The distinction that defines this skill is **intent over diff**. Generic linters and the `code-review` skill already cover diff-level correctness and cleanup; this skill reviews against **intent** and layers on top — so don't re-hunt bugs here, delegate that (step 2) and spend your legwork on whether the change is the *right* change.
 
-Third skill in the **plan → implement → pre-push review** pipeline. Its inputs are the same three artefacts the pipeline carries: the **ticket**, the **hand-off doc**, and the **working diff**.
+Third skill in the **plan → implement → pre-push-review** pipeline. Its inputs are the same three artefacts the pipeline carries: the **ticket**, the **hand-off doc**, and the **working diff**.
 
 **Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) builds the change one slice at a time and makes the project's **tests, type checks, and linters** pass — and stops there; it runs **no review**. This skill owns the review in full: the `code-review`/`security-review` correctness and reuse pass (step 2), the Fowler code-smell scan (step 3), and the authoritative verdict against the acceptance criteria, scope, non-goals, and assumptions (steps 4–5). The concerns don't overlap and nothing is reviewed twice — because `implement` reviews nothing, every pass here is the first of its kind over the change.
 

@@ -1,6 +1,6 @@
 ---
 name: ai-ready-repo
-description: Use when making a repository AI-ready — bootstrapping (greenfield) or retrofitting (existing repo) the AGENTS.md index, .claude/ rules and settings, a durability-organised docs/ knowledge base, and a scripts/ directory so agents and humans collaborate from the same context. Triggers on "make this repo AI-ready", "set up agent docs/rules/settings", "onboard this project for Claude Code / Cursor / Codex", "add AGENTS.md and rules".
+description: Use when making a repository AI-ready — bootstrapping a greenfield project or retrofitting an existing repo so agents and humans collaborate from the same context. Triggers on "make this repo AI-ready", "set up agent docs/rules/settings", "onboard this project for Claude Code / Cursor / Codex", "add AGENTS.md and rules".
 ---
 
 # AI-ready repo
