@@ -1,17 +1,17 @@
 ---
 name: pre-push-review
-description: Use when reviewing a change against its ticket and hand-off doc before pushing or opening a PR — checking it satisfies the acceptance criteria and honours the plan's agreed scope, non-goals, and assumptions, not just that the diff reads cleanly. Third skill in the plan → implement → pre-push-review pipeline. Produces categorised, severity-ranked findings in Conventional Comments format with a ready-to-push verdict; delegates pure-diff bug-hunting to the code-review skill and scans the diff for Fowler code smells.
+description: Use when reviewing a change against its ticket and hand-off doc before pushing or opening a PR — checking it satisfies the acceptance criteria and honours the plan's agreed scope, non-goals, and assumptions, not just that the diff reads cleanly. Third skill in the plan → implement → pre-push-review pipeline. Sizes the review to the change — a small, low-risk diff gets a light pass, a large or security-sensitive one the full treatment — and produces categorised, severity-ranked findings in Conventional Comments format with a ready-to-push verdict; runs the code-review skill inline for pure-diff bug-hunting and scans the diff for Fowler code smells.
 ---
 
 # Pre-push review
 
 Review a change the way a diligent colleague would *before* it goes up — against the **original problem** and the **hand-off doc**, not just the diff. Catch what you'd be embarrassed to have a reviewer catch: a clean diff that solved the *wrong* problem, drifted past the agreed scope, or quietly broke an assumption the plan was built on.
 
-The distinction that defines this skill is **intent over diff**. Generic linters and the `code-review` skill already cover diff-level correctness and cleanup; this skill reviews against **intent** and layers on top — so don't re-hunt bugs here, delegate that (step 2) and spend your legwork on whether the change is the *right* change.
+The distinction that defines this skill is **intent over diff**. Generic linters and the `code-review` skill already cover diff-level correctness and cleanup; this skill reviews against **intent** and layers on top — so don't re-hunt bugs here, run that pass once (step 3) and spend your legwork on whether the change is the *right* change.
 
 Third skill in the **plan → implement → pre-push-review** pipeline. Its inputs are the same three artefacts the pipeline carries: the **ticket**, the **hand-off doc**, and the **working diff**.
 
-**Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) builds the change one slice at a time and makes the project's **tests, type checks, and linters** pass — and stops there; it runs **no review**. This skill owns the review in full: the `code-review`/`security-review` correctness and reuse pass (step 2), the Fowler code-smell scan (step 3), and the authoritative verdict against the acceptance criteria, scope, non-goals, and assumptions (steps 4–5). The concerns don't overlap and nothing is reviewed twice — because `implement` reviews nothing, every pass here is the first of its kind over the change.
+**Where `implement` ends and this skill begins.** [`implement`](../implement/SKILL.md) builds the change one slice at a time and makes the project's **tests, type checks, and linters** pass — and stops there; it runs **no review**. This skill owns the review in full: the `code-review`/`security-review` correctness and reuse pass (step 3), the Fowler code-smell scan (step 4), and the authoritative verdict against the acceptance criteria, scope, non-goals, and assumptions (steps 5–6). The concerns don't overlap and nothing is reviewed twice — because `implement` reviews nothing, every pass here is the first of its kind over the change.
 
 This skill expects to run with a **fresh/cleared context** — ideally a new session, handed off from `implement` — reading its state from the three shared artefacts below rather than the implementation conversation. That keeps the review independent: unprimed by the mental model of whoever wrote the code.
 
@@ -25,15 +25,33 @@ If no hand-off doc exists, you can still review against the ticket — but say s
 
 **Completion criterion:** you can state the acceptance criteria, the agreed scope and non-goals, and the recorded assumptions, and you have the full diff in view.
 
-## 2. Delegate the diff-level pass
+## 2. Set the review weight
+
+Size the change and pick how heavily to review it — the **weight** — so the effort stays **proportional** to what is at stake. Two weights:
+
+- **light** — a small, low-risk diff: on the order of a handful of files and a few hundred lines, no security-sensitive surface, and mostly tests, config, or mechanical / moved code.
+- **full** — larger than that, or touching a **security-sensitive** surface (auth, secrets, input handling, permissions) or an **architecturally significant** one. When the call is genuinely borderline, go **full** — under-reviewing a risky change is the more expensive miss.
+
+The weight scales only the **diff-level** work: on a light review the correctness pass runs inline at lighter effort and absorbs the code-smell scan (steps 3–4), and the batch-size pass (step 7) is already settled by the sizing you just did, so it is skipped. The weight never scales the **intent** passes — the acceptance-criteria walk (step 5) and the scope / non-goals / assumptions walk (step 6) run in full at either weight, because "solved the wrong problem" is the class this skill exists to catch and it is no cheaper to miss on a small diff.
+
+**Completion criterion:** the change is sized and the weight — light or full — is set, with the security and architecture surfaces checked before settling on light.
+
+## 3. Run the correctness pass
 
 Run the `code-review` skill (a Claude Code built-in) for correctness and reuse/cleanup on the raw diff. Where the change touches a security-sensitive surface (auth, secrets, input handling, permissions), run `security-review` too. Fold their output into your report as the correctness and security categories — do **not** re-hunt those defects yourself; that is what those skills are for.
 
+**Run this pass inline, in the current context — never hand it to a backgrounded fork.** A subagent that kicks off `code-review` as its own background workflow reports back with waiting-stubs instead of findings, so you pay tokens and wall-clock for a dead end and end up re-running the pass inline anyway. Keep it synchronous so the findings land in your hands here. Calibrate the effort to the **weight**:
+
+- **light** — run the correctness pass inline at `low`/`medium` effort, and **fold the code-smell scan (step 4) into this same walk** rather than running it as a separate pass. Skip step 4.
+- **full** — run `code-review` at `high` effort and keep the code-smell scan as its own pass (step 4).
+
 This is the pipeline's **single** correctness/reuse pass, run once over the whole change — and, because [`implement`](../implement/SKILL.md) runs no review of its own, the **first** review the change receives at all. Review the full diff here regardless of how it was built.
 
-**Completion criterion:** `code-review` has run (and `security-review` where the surface warrants it) over the whole change, and their findings are captured for your report.
+**Completion criterion:** the correctness pass has run inline over the whole change (and `security-review` where the surface warrants it), its findings captured for your report; on a light review the code-smell scan was folded in here and step 4 is skipped.
 
-## 3. Scan the diff for code smells
+## 4. Scan the diff for code smells
+
+**Full reviews reach this step as its own pass; a light review folded it into step 3 and skips here.**
 
 Walk the diff once against the **code-smell** catalogue in [`CODE-SMELLS.md`](CODE-SMELLS.md) — Fowler's smells, each with the signals that betray it in a diff and the refactoring that removes it. This pass owns **maintainability**: structural signs the design is paying for something, which the correctness-focused `code-review` pass doesn't target.
 
@@ -41,7 +59,7 @@ Two rules keep this pass useful rather than noisy, both spelled out in the catal
 
 **Completion criterion:** the diff has been walked against the catalogue; every smell the change introduces or worsens is recorded with its `file:line`, the signal that fired, and a suggested refactoring, and borderline signals were left unflagged.
 
-## 4. Review against the acceptance criteria
+## 5. Review against the acceptance criteria
 
 Walk **each** acceptance criterion from the ticket and decide whether the change demonstrably satisfies it — with evidence, not assertion. A criterion the diff cannot be shown to meet is a **blocking** finding: this is the "solved the wrong problem" class, the most expensive miss and the whole reason this skill exists.
 
@@ -49,7 +67,7 @@ This acceptance-criteria verdict is **this skill's to own**: [`implement`](../im
 
 **Completion criterion:** every acceptance criterion is marked met or unmet, each backed by concrete evidence.
 
-## 5. Review against scope, non-goals, and assumptions
+## 6. Review against scope, non-goals, and assumptions
 
 The hand-off doc agreed the boundaries; check the diff stayed inside them.
 
@@ -59,19 +77,21 @@ The hand-off doc agreed the boundaries; check the diff stayed inside them.
 
 **Completion criterion:** scope, each non-goal, and each recorded assumption are checked, and every violation is recorded as a finding.
 
-## 6. Check batch size and slice integrity
+## 7. Check batch size and slice integrity
+
+**Full reviews only — a light review already sized the change as small in step 2, so the batch-size verdict is settled; skip this step.**
 
 A change well past a handful of files or a few hundred lines, or a **horizontal slice** that doesn't stand up end-to-end, is itself a finding — recommend splitting into smaller **vertical slices**. Small batches are easier to review, safer to revert, and faster to validate against the problem.
 
 **Completion criterion:** the change's size and slice shape are assessed; any oversize or horizontal slice is flagged with a concrete split recommendation.
 
-## 7. Categorise, rank, and format the findings
+## 8. Categorise, rank, and format the findings
 
-Turn everything from steps 2–6 into findings. Each finding carries a **category**, a **severity**, and a single **Conventional Comments** line — see [`REVIEW-RUBRIC.md`](REVIEW-RUBRIC.md) for the category set, the severity scale, and the format with a worked example. Order the list **blocker-first**, so the reader triages the highest-impact items before any nit.
+Turn everything from steps 3–7 into findings. Each finding carries a **category**, a **severity**, and a single **Conventional Comments** line — see [`REVIEW-RUBRIC.md`](REVIEW-RUBRIC.md) for the category set, the severity scale, and the format with a worked example. Order the list **blocker-first**, so the reader triages the highest-impact items before any nit.
 
 **Completion criterion:** every finding has a category, a severity, and a conventional-comment line, and the list is ordered blocker-first.
 
-## 8. Deliver the verdict
+## 9. Deliver the verdict
 
 Lead with a one-line **verdict** — *ready to push* or *needs work* — and the count of blocking findings. Then the ranked findings beneath it, blockers first; nothing blocking may sit below a nit.
 

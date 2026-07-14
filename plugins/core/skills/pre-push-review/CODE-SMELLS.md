@@ -1,6 +1,6 @@
 # Code smells
 
-The catalogue for the **code-smell pass** — Fowler's smells from *Refactoring*, each paired with the diff signals that betray it and the refactoring that removes it. Consulted from step 3 of [`SKILL.md`](SKILL.md).
+The catalogue for the **code-smell pass** — Fowler's smells from *Refactoring*, each paired with the diff signals that betray it and the refactoring that removes it. Consulted from step 4 of [`SKILL.md`](SKILL.md) (or folded into step 3 on a light review).
 
 A smell is a *hint*, not a verdict. Every finding here is **advisory** — it names what looks off, points at the fix, and leaves the call to the author.
 

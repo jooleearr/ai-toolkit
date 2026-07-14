@@ -1,6 +1,6 @@
 # Expected findings — `smelly-order-service.js`
 
-The smells the **code-smell pass** (step 3 of [`../SKILL.md`](../SKILL.md)) should surface when the whole of [`smelly-order-service.js`](smelly-order-service.js) is treated as the diff under review. Use this as a fixture: run the pass over the sample and check each row is reported with its `file:line`, the signal that fired, and the paired refactoring — and that nothing outside this list is invented.
+The smells the **code-smell pass** (step 4 of [`../SKILL.md`](../SKILL.md)) should surface when the whole of [`smelly-order-service.js`](smelly-order-service.js) is treated as the diff under review. Use this as a fixture: run the pass over the sample and check each row is reported with its `file:line`, the signal that fired, and the paired refactoring — and that nothing outside this list is invented.
 
 Line numbers key into `smelly-order-service.js`.
 
