@@ -1,4 +1,4 @@
-// Fixture for the code-smell pass (step 3 of ../SKILL.md).
+// Fixture for the code-smell pass (step 4 of ../SKILL.md).
 // A deliberately smelly sample: each region below plants one representative
 // Fowler smell for the pass to catch. Expected findings are in
 // EXPECTED-FINDINGS.md, keyed by the line numbers here — keep them in sync.
