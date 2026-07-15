@@ -8,11 +8,11 @@ Every finding sits in exactly one category. They double as the report's section 
 
 | Category | Covers |
 | :------- | :----- |
-| `scope-fit` | Does the change solve *this* problem and stay inside the agreed scope? Unmet acceptance criteria, scope creep, non-goals breached, broken assumptions. **The category this skill owns** — the others are shared with `code-review`. |
-| `correctness` | Logic bugs, wrong results, unhandled edge cases. Mostly folded in from `code-review`. |
+| `scope-fit` | Does the change solve *this* problem and stay inside the agreed scope? Unmet acceptance criteria, scope creep, non-goals breached, broken assumptions. **Owned by this skill's intent passes** (step 4). |
+| `correctness` | Logic bugs, wrong results, unhandled edge cases. From this skill's own diff-level pass — see [`DIFF-REVIEW.md`](DIFF-REVIEW.md) (step 2). |
 | `architecture` | Boundary and layer fit; a structural change smuggled in under a feature. |
 | `tests` | Behaviour coverage of the acceptance criteria; tests that assert behaviour, not implementation. |
-| `readability` | Naming, dead code, units that fight the surrounding idiom. |
+| `readability` | Naming, dead code, units that fight the surrounding idiom. Reuse/cleanup findings from the diff-level pass ([`DIFF-REVIEW.md`](DIFF-REVIEW.md), step 2). |
 | `security` | Auth, secrets, input handling, permissions. Folded in from `security-review` where it ran. |
 | `observability` | Logging, metrics, tracing the change warrants — diagnosable in production, no secrets leaked. |
 | `code-smell` | Maintainability signs from the Fowler catalogue — Long Function, Data Clumps, Feature Envy, and the rest. From the [`CODE-SMELLS.md`](CODE-SMELLS.md) pass (step 3); each finding names the smell and pairs it with a refactoring. |
