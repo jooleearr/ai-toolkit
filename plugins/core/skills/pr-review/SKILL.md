@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Use when reviewing an open GitHub PR — usually a teammate's — against its Jira ticket, when asked to "review this PR" or "review PR #123", or when you want teammate-style feedback drafted as an editable pending review. Outward-facing sibling of pre-push-review: reviews someone else's change after it's up, against the ticket, PR description, and diff, with no hand-off doc to lean on. Owns a token-efficient diff-level correctness/reuse pass — scaled by risk tier, not line count — and scans the diff for Fowler code smells. Comments read as a colleague, not a linter. Always asks before posting, and defaults to a pending draft review you can edit in GitHub.
+description: Use when reviewing an open GitHub PR — usually a teammate's — against its Jira ticket, when asked to "review this PR" or "review PR #123", or when you want teammate-style feedback drafted as an editable pending review. Outward-facing sibling of pre-push-review: reviews someone else's change after it's up, against the ticket, PR description, and diff, with no hand-off doc to lean on. Owns a proportional diff-level correctness/reuse pass and scans the diff for Fowler code smells. Comments read as a colleague, not a linter. Always asks before posting, and defaults to a pending draft review you can edit in GitHub.
 ---
 
 # PR review

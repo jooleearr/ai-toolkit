@@ -1,6 +1,6 @@
 # Review rubric
 
-The vocabulary for a pre-push review finding: the **category** that names the concern, the **severity** that ranks it, and the **Conventional Comments** line that states it. Consulted from step 7 of [`SKILL.md`](SKILL.md).
+The vocabulary for a PR review finding: the **category** that names the concern, the **severity** that ranks it, and the **Conventional Comments** line that states it. Consulted from step 6 of [`SKILL.md`](SKILL.md).
 
 ## Categories
 
