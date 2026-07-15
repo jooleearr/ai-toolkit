@@ -33,15 +33,14 @@ Honour an explicit effort the user asks for over the tier.
 
 ## When you fan out, keep it bounded
 
-Fan out only at the **high** tier, and cap it at **2–3 orthogonal dimensions** — one read-only reviewer per axis so they don't pollute each other's context, never a per-concern swarm:
+Fan out only at the **high** tier, and cap it at **2 orthogonal dimensions** — one read-only reviewer per axis so they don't pollute each other's context, never a per-concern swarm:
 
 - **correctness / bugs** — logic errors, wrong results, unhandled edges, dropped cases, leaks.
 - **reuse / cleanup** — a helper that already exists, a simpler construct, dead code the change strands.
-- **spec-fidelity** *(optional third)* — does the diff do what its commits and the PR description claim, no more and no less.
 
 Two rules keep the fan-out cheap and precise:
 
-- **Self-contained prompts.** Paste the diff payload — and the smell baseline the axis needs — straight into each reviewer's prompt, so it makes no extra file-reading round-trips, and hold it to a hard budget (**under ~400 words** each).
+- **Self-contained prompts.** Paste the diff payload — and any local context the axis needs — straight into each reviewer's prompt, so it makes no extra file-reading round-trips, and hold it to a hard budget (**under ~400 words** each).
 - **Documented standards win.** A repo standard the codebase already states overrides the generic baseline; say so in the prompt, so a reviewer doesn't flag house style as a defect.
 
 ## Output
@@ -50,4 +49,4 @@ No separate output shape. Findings fold into the same report as every other pass
 
 ## The pass in one line
 
-Compute the diff once and validate it; default to a single diff-only pass at the change's risk tier; skip what tooling enforces; fan out to at most 2–3 self-contained reviewers only on a high-risk surface; fold the findings in as `correctness` and `readability`.
+Compute the diff once and validate it; default to a single diff-only pass at the change's risk tier; skip what tooling enforces; fan out to at most 2 self-contained reviewers only on a high-risk surface; fold the findings in as `correctness` and `readability`.
