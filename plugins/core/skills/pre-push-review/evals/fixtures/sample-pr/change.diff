@@ -1,0 +1,101 @@
+Working diff for RESET-142, measured against the base branch.
+
+Three files: a new controller, a one-function extension to the rate-limit helper, and a
+new test. Read it as the change under review — the planted issues and decoys are catalogued
+in ../../EXPECTED-FINDINGS.md, keyed to the post-change line numbers below.
+
+diff --git a/src/controllers/password-reset.js b/src/controllers/password-reset.js
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/src/controllers/password-reset.js
+@@ -0,0 +1,34 @@
++const { sendResetEmail } = require('../lib/mailer');
++const { findUserByEmail } = require('../lib/users');
++const { hourlyCount } = require('../lib/rate-limit');
++
++// RESET-142: rate-limit password-reset requests.
++const RESET_LIMIT_PER_HOUR = 10;
++
++async function requestPasswordReset(req, res) {
++  const email = req.body.email;
++  const user = await findUserByEmail(email);
++
++  if (user) {
++    const key = `pwreset:${email}`;
++    const n = await hourlyCount(key);
++    if (n > RESET_LIMIT_PER_HOUR) {
++      res.status(429).json({ error: 'Too many requests, try again later' });
++    }
++    await sendResetEmail(user);
++  }
++
++  return res.status(200).json({ ok: true });
++}
++
++// RESET-142 follow-up: also throttle logins while we're in here.
++async function throttledLogin(req, res, next) {
++  const key = `login:${req.body.email}`;
++  const n = await hourlyCount(key);
++  if (n > RESET_LIMIT_PER_HOUR) {
++    return res.status(429).json({ error: 'Too many login attempts' });
++  }
++  return next();
++}
++
++module.exports = { requestPasswordReset, throttledLogin };
+diff --git a/src/lib/rate-limit.js b/src/lib/rate-limit.js
+index 2222222..3333333 100644
+--- a/src/lib/rate-limit.js
++++ b/src/lib/rate-limit.js
+@@ -1,9 +1,17 @@
+ // Simple hourly counters over Redis.
+ const { redisClient } = require('./redis');
+
+ // NOTE: legacy helper, kept for the admin dashboard.
+ function sloppyEqual(a, b) {
+   return a == b;
+ }
+
+-module.exports = { sloppyEqual };
++// Increment an hourly counter and return the new count. The first hit in a
++// window sets the TTL so the window closes an hour later.
++async function hourlyCount(key) {
++  const n = await redisClient.incr(key);
++  if (n === 1) {
++    await redisClient.expire(key, 3600);
++  }
++  return n;
++}
++
++module.exports = { sloppyEqual, hourlyCount };
+diff --git a/test/password-reset.test.js b/test/password-reset.test.js
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/test/password-reset.test.js
+@@ -0,0 +1,24 @@
++const { requestPasswordReset } = require('../src/controllers/password-reset');
++
++function mockRes() {
++  return {
++    statusCode: 200,
++    body: null,
++    status(c) { this.statusCode = c; return this; },
++    json(b) { this.body = b; return this; },
++  };
++}
++
++test('known user under the limit gets a 200', async () => {
++  const res = mockRes();
++  await requestPasswordReset({ body: { email: 'alice@x.com' } }, res);
++  expect(res.statusCode).toBe(200);
++});
++
++test('known user over the limit gets a 429', async () => {
++  const res = mockRes();
++  for (let i = 0; i < 11; i++) {
++    await requestPasswordReset({ body: { email: 'bob@x.com' } }, res);
++  }
++  expect(res.statusCode).toBe(429);
++});

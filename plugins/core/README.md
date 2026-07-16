@@ -17,9 +17,11 @@ Core reusable skills that apply to any project.
 | `silverstripe-worktree-lanes` | `/core:silverstripe-worktree-lanes` (or model-invoked) | Set up and manage long-running git worktree "lanes" for parallel agents on a Silverstripe + DDEV project — create, reset onto a new base, or retire a lane, each with its own isolated DDEV project and per-lane database. Ships `create`/`reset`/`retire` scripts and discloses rationale to `REFERENCE.md`. |
 | `hunk-review` | `/core:hunk-review` (or model-invoked) | The discoverable front door for [hunk](https://github.com/modem-dev/hunk) (terminal diff viewer) and [herdr](https://herdr.dev) (pane/tab workspace manager): auto-fires on plain phrasings like "open the diff" or "action my comments", loads hunk's own bundled skill at run time via `hunk skill path`, and supplies the herdr placement glue hunk doesn't cover. Opens diffs in a herdr pane/tab and drives hunk's comment loop with confirmation-gated removal. Degrades gracefully when either tool is absent. |
 
-> **Note:** `pre-push-review/fixtures/` (`smelly-order-service.js`, `EXPECTED-FINDINGS.md`) is
-> author-time test data for validating the code-smell pass, not a runtime resource — it is
-> deliberately not referenced from `pre-push-review/SKILL.md`.
+> **Note:** `pre-push-review/fixtures/` (`smelly-order-service.js`, `EXPECTED-FINDINGS.md`)
+> and `pre-push-review/evals/` (a full sample-PR eval that grades a review through a "done
+> is better than perfect" lens) are author-time test data — for validating the code-smell
+> pass and the whole review respectively — not runtime resources, and are deliberately not
+> referenced from `pre-push-review/SKILL.md`.
 
 ## Agents
 
