@@ -44,6 +44,18 @@ install.sh                         # registers marketplace + merges shared setti
   Action takes it from there. (Without any version the git commit SHA is used, and every
   commit counts as an update.)
 
+## Skill evals
+
+Skills can ship an `evals/` directory (fixtures + `evals/README.md` describing how to
+run and grade them — see `plugins/core/skills/pre-push-review/evals/` for the pattern).
+Any skill with an `evals/README.md` is picked up automatically by the scheduled
+"ai-toolkit daily skill-eval regression check" Routine: it re-runs the eval whenever the
+skill or its fixtures change on `main`, logs the result to that skill's
+`evals/results/history.jsonl`, and opens a `[eval regression] <skill>: ...` issue if a
+run scores worse than the last one. Results land via an auto-merged PR, never a direct
+push. No per-skill configuration needed — adding `evals/README.md` + a results log is
+enough to be covered.
+
 ## Common tasks
 
 - **Add a skill** to a plugin: create `plugins/<plugin>/skills/<name>/SKILL.md`, then

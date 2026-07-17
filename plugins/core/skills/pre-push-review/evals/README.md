@@ -93,6 +93,19 @@ pattern without burning a full session per number.
   limit `5` must appear) to catch total misfires before spending a judge call.
 - **Repeats** — **5 trials**, median for the sub-scores, worst-case for the blockers.
 
+## Automated regression monitoring
+
+A scheduled Routine ("ai-toolkit daily skill-eval regression check") checks daily
+whether this skill (or its fixtures) changed on `main` since the last recorded run and,
+if so, runs this eval per the instructions above and appends the result to
+[`results/history.jsonl`](results/history.jsonl). Results land via a PR (auto-merged)
+rather than a direct push. If a run scores worse than the previous one — a verdict flip,
+a previously-reliable blocker now missed, or a sub-score crossing the pass bar above —
+it opens a GitHub issue titled `[eval regression] pre-push-review: ...` (or comments on
+an existing one) instead of filing a duplicate. A clean run is silent. The same Routine
+picks up any other skill that grows an `evals/README.md` — no per-skill configuration
+needed.
+
 ## What we learned
 
 Findings from building this first eval, to inform whether to extend the approach:
