@@ -23,6 +23,8 @@ Outward-facing sibling of [`pre-push-review`](../pre-push-review/SKILL.md). That
 
 Own the diff-level pass — correctness (logic bugs, wrong results, unhandled edges) and reuse/cleanup (a helper that already exists, a simpler construct, dead code the change strands) — with the token-efficient workflow in [`DIFF-REVIEW.md`](DIFF-REVIEW.md). Compute the diff once, default to a single diff-only pass, escalate by **risk tier** rather than line count, and fan out to a bounded 2–3 dimensions only on a high-risk surface. Fold its findings into your report as the `correctness` and `readability` categories. Reuse it; don't restate it.
 
+**Don't run the project's build, tests, type-checker, or linter to produce findings** — CI already gates these on every push, so re-running them locally is wasted time and tokens with no added signal. Read CI's existing results if the PR has them and cite a check that has *already failed*; only execute code for the narrow case where a behaviour genuinely can't be reasoned about from the diff. See [`DIFF-REVIEW.md`](DIFF-REVIEW.md).
+
 Where the change touches a security-sensitive surface (auth, secrets, input handling, permissions, deserialisation), run `security-review` (a Claude Code built-in) too, and fold its output in as the `security` category — do **not** re-hunt security defects yourself. That delegation stays; this skill owns only the correctness/reuse pass.
 
 **Completion criterion:** the diff-level correctness/reuse pass has run at a weight scaled to the change's risk tier per [`DIFF-REVIEW.md`](DIFF-REVIEW.md) (and `security-review` where the surface warrants it), and the findings are captured for your report.
@@ -94,6 +96,6 @@ Print the ranked summary in the terminal (blockers first, then a one-line verdic
 2. **Submit it** — post the review as `COMMENT` (or `REQUEST_CHANGES` when there are blockers), on explicit confirmation only.
 3. **Terminal only** — post nothing.
 
-Degrade gracefully throughout: no Atlassian MCP, no ticket ID, no test suite, no CI each downgrades a pass to "couldn't check, here's why" — never abort the review.
+Degrade gracefully throughout: no Atlassian MCP, no ticket ID, or no CI results to read each downgrades a pass to "couldn't check, here's why" — never abort the review. Reading CI's *existing* results is the posture here; a missing suite means you note the gap, not that you run the suite yourself (see step 2).
 
 **Completion criterion:** the ranked findings and verdict were shown in the terminal, the user was asked how to deliver, and nothing was posted to the PR without their choice.
