@@ -19,6 +19,8 @@ Default to **one pass over the diff alone**, read inline in the current context.
 
 **Skip what tooling already enforces** — lint, formatting, type-checking. A finding a linter would catch on the author's next commit spends the author's trust for nothing.
 
+**Don't run the project's build, tests, type-checker, or linter.** CI gates these on every push — reviewing their output is CI's job, not the review's. Running a suite whose findings you've already been told to skip is doubly wasteful: it burns time and tokens (often an extra branch checkout) for no signal the PR's CI isn't already reporting. Read the diff and reason about correctness statically; if a check *has already failed on the PR*, cite that failure rather than reproducing it locally. The one deliberate exception is behaviour that genuinely can't be reasoned about from the diff — a specific repro you must execute to confirm — which is a narrow, named call, not routine pre-flight verification.
+
 ## Escalate by risk tier, not line count
 
 Widen the pass by the change's **risk tier** — its blast radius — not its size. A config tweak earns a linter and a glance; a payments or auth path earns the full pass at ten lines. Size is a weak proxy: a 400-line generated-fixture diff is low-risk, a 15-line change to token validation is not.
@@ -49,4 +51,4 @@ No separate output shape. Findings fold into the same report as every other pass
 
 ## The pass in one line
 
-Compute the diff once and validate it; default to a single diff-only pass at the change's risk tier; skip what tooling enforces; fan out to at most 2 self-contained reviewers only on a high-risk surface; fold the findings in as `correctness` and `readability`.
+Compute the diff once and validate it; default to a single diff-only pass at the change's risk tier; skip what tooling enforces and don't run it yourself; fan out to at most 2 self-contained reviewers only on a high-risk surface; fold the findings in as `correctness` and `readability`.
