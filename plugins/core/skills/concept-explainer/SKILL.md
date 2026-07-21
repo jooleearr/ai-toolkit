@@ -1,6 +1,6 @@
 ---
 name: concept-explainer
-description: Use when you're working in an unfamiliar area and want to understand a concept, system, or piece of jargon — builds a durable mental model in plain terms, leaning on an analogy, an end-to-end flow through the system, and a rendered diagram, grounded in your own codebase where one is present. Companion to the plan → implement → pre-push-review pipeline, used throughout. Progressive: starts shallow and goes one rung deeper on request.
+description: "Use when you're working in an unfamiliar area and want to understand a concept, system, or piece of jargon — builds a durable mental model in plain terms, leaning on an analogy, an end-to-end flow through the system, and a rendered diagram, grounded in your own codebase where one is present. Companion to the plan → implement → pre-push-review pipeline, used throughout. Progressive: starts shallow and goes one rung deeper on request."
 ---
 
 # Concept explainer
