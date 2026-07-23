@@ -30,6 +30,13 @@ Deliver the explanation in a consistent **shape**, the short version first:
 - **End-to-end flow** — trace how it actually moves through the system, start to finish. Follow the flow; don't just name the parts.
 - **Where you'll see this in our code** — point at the concrete files and functions from step 2 (omit when nothing is local).
 
+**Real terms first (when grounded).** In the grounded beats — the plain-terms definition, the flow, and where-you'll-see-this — lead with the actual identifiers from the code (the class, property, relation, and enum names the reader will grep for) and relegate any descriptive or metaphor shorthand to a parenthetical *after* the real term, never before it. Invented nouns used as the primary vocabulary read as AI speak and force the reader to translate back to the code, breaking the whole point of grounding — that they can go find the thing.
+
+- Good: "the `Versions()` self-relation (the 'version history' of one step)"
+- Avoid: "the version chain (in the code, `Versions()`)"
+
+The Analogy beat above is exempt: an up-front metaphor is how the first intuition lands. This is only about the grounded beats, where the identifiers should lead and the shorthand should follow.
+
 A few sentences per part, not a wall of text — depth is step 5's job.
 
 **Completion criterion:** every part of the shape delivered (three when there's no codebase), each in plain terms.
