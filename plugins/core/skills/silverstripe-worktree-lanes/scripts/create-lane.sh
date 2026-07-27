@@ -148,7 +148,7 @@ fi
 # host and break the lane.
 uses_env_hosts=0; uses_yaml_hosts=0
 [[ -f "$lane_env" ]] && grep -qsE '^SS_ALLOWED_HOSTS=' "$lane_env" && uses_env_hosts=1
-git -C "$repo_root" grep -qsIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && uses_yaml_hosts=1
+git -C "$repo_root" grep -qIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && uses_yaml_hosts=1
 
 restricts_hosts=0
 if [[ "$uses_env_hosts" -eq 1 ]]; then

@@ -59,7 +59,7 @@ canonical="${canonical:-$repo_name}"
 flush_host="${LANE_FLUSH_HOST:-${canonical}.ddev.site}"
 restricts_hosts=0
 { [[ -f "$lane_dir/.env" ]] && grep -qsE '^SS_ALLOWED_HOSTS=' "$lane_dir/.env"; } && restricts_hosts=1
-git -C "$repo_root" grep -qsIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && restricts_hosts=1
+git -C "$repo_root" grep -qIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && restricts_hosts=1
 
 [[ -d "$lane_dir" ]] || { echo "error: no lane at $lane_dir — create it first." >&2; exit 1; }
 cd "$lane_dir"
