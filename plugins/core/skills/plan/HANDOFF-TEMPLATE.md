@@ -52,10 +52,16 @@ change the ticket implies rather than smuggling it in.>
 ## Slice checklist
 
 The vertical-slice sequence. Each slice is a small PR (a handful of files, a few hundred
-LOC) that leaves the mainline mergeable; flag any that needs a feature branch/flag.
+LOC) that leaves the mainline mergeable; flag any that needs a feature branch/flag. A task
+that is a single tracer bullet is a one-item checklist — a correct outcome, not an under-filled one.
+
+Where a unit is one atomic change whose pieces can't each land alone, mark it **internal
+slices of one atomic change** so `implement` takes them together on one branch instead of
+splitting them.
 
 - [ ] **Slice 1 — <name>:** <the working end-to-end path this delivers>
 - [ ] **Slice 2 — <name>:** <…>
+- [ ] **Slice 3 (internal slices of one atomic change) — <name>:** <the pieces, taken together as one branch>
 
 ## Risks / unknowns
 

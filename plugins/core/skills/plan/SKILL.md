@@ -43,15 +43,18 @@ Now, and not before, work out *how*. Map the change onto the actual codebase —
 
 **Completion criterion:** a proposed approach exists and names the concrete code it touches.
 
-## 4. Decompose into vertical slices
+## 4. Size the work into vertical slices
 
-Agents default to large batches — a whole horizontal layer (all the models, then all the services, then all the UI) before anything works end to end. Sequence the plan the opposite way, as thin **vertical slices**, each delivering a working path through the system:
+Start by sizing the task against a single small PR — **a handful of files and no more than a few hundred lines** — before assuming it needs breaking up. The right shape depends on how the task arrives: a **tracer-bullet** ticket from `spec-to-tickets`, or a Jira ticket someone already scoped down, may already *be* one slice. Branch on the size:
 
-- Size each slice so its eventual PR is **a handful of files and no more than a few hundred lines**. If a slice is bigger, split it.
-- Order slices so each one leaves the mainline in a **working, mergeable state**. Where a slice genuinely can't merge partially working, note that it belongs behind a **feature branch** (and ideally a feature flag).
-- The doc's checklist *is* this slice sequence — small, independently shippable steps, not one monolithic task.
+- **Already one slice** — the task is a single tracer bullet that fits one small PR. Emit a one-item checklist and move on. A one-slice plan is a correct outcome, not a step you skipped.
+- **Bigger than one PR** — decompose. Agents default to large batches — a whole horizontal layer (all the models, then all the services, then all the UI) before anything works end to end. Sequence the opposite way, as thin **vertical slices**, each a tracer bullet delivering a working path through the system, each sized to a small PR and ordered so every slice leaves the mainline **working and mergeable**.
+- **Just over the line, not cleanly splittable** — a bit more than one PR, but the pieces can't each land alone (a component that must branch on loading / error / data from the outset). Mark it as **internal slices of one atomic change** — the vocabulary `implement` step 2 reads — and keep it one unit; forcing a split here buys artificial commits and a broken intermediate mainline, not smaller PRs.
+- **Too wide to be one ticket** — if it needs well more than one small PR and the boundary was drawn too wide, say so and recommend re-drawing the ticket boundary upstream, rather than absorbing it into a sprawling multi-slice plan.
 
-**Completion criterion:** an ordered list of slices exists, each sized to a small PR and each leaving the mainline mergeable (or flagged as needing a feature branch).
+Where a slice genuinely can't merge partially working, note that it belongs behind a **feature branch** (and ideally a feature flag). Each slice on the doc's checklist is a working end-to-end path sized to a small PR.
+
+**Completion criterion:** the work is sized — a one-slice checklist, an ordered multi-slice sequence, a single atomic change marked as internal slices, or a recommendation to re-draw a too-wide boundary — with each slice sized to a small PR and leaving the mainline mergeable (or flagged as needing a feature branch).
 
 ## 5. Write the hand-off doc
 
