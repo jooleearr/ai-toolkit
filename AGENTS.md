@@ -4,18 +4,6 @@ A personal **Claude Code plugin marketplace**: a catalogue of reusable skills, a
 and shared settings distributed via the plugin system. It is **not** an application —
 there is no build, no dependencies, no runtime. Everything is Markdown + JSON config.
 
-## Structure
-
-```
-.claude-plugin/marketplace.json   # catalog listing every plugin
-plugins/<name>/                    # one plugin per directory
-  .claude-plugin/plugin.json       #   manifest (name, description, version)
-  skills/<skill>/SKILL.md          #   skills (model-invoked or /<plugin>:<skill>)
-  agents/, hooks/, .mcp.json       #   optional components
-shared/settings.template.json      # default permissions (installed via install.sh)
-install.sh                         # registers marketplace + merges shared settings
-```
-
 **Critical rule:** only `plugin.json` goes inside a plugin's `.claude-plugin/` folder.
 `skills/`, `agents/`, `hooks/`, `.mcp.json`, `settings.json` all live at the plugin
 **root**, never inside `.claude-plugin/`.
