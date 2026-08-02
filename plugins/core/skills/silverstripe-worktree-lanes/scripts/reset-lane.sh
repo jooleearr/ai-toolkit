@@ -61,6 +61,50 @@ restricts_hosts=0
 { [[ -f "$lane_dir/.env" ]] && grep -qsE '^SS_ALLOWED_HOSTS=' "$lane_dir/.env"; } && restricts_hosts=1
 git -C "$repo_root" grep -qIE 'AllowedHostsMiddleware' -- "$ss_config_dir" 2>/dev/null && restricts_hosts=1
 
+# Wire up git hooks for the lane after a reset. `git clean -fd` (no -x) below leaves the
+# gitignored generated hooks dir in place, so this is usually a no-op — but it repairs a
+# lane created before hook-wiring existed, or one whose new base changes the hook config.
+# See create-lane.sh for why regenerating must happen on the host, not in the container.
+ensure_worktree_git_hooks() {
+  local dir="$1"
+  [[ -f "$dir/package.json" ]] || return 0
+
+  local hooks_path
+  hooks_path="$(git -C "$dir" config --get core.hooksPath 2>/dev/null || true)"
+  [[ -n "$hooks_path" ]] || return 0   # project doesn't use a core.hooksPath hook manager
+
+  local resolved="$hooks_path"
+  [[ "$resolved" = /* ]] || resolved="$dir/$hooks_path"
+
+  if [[ -d "$resolved" && -n "$(ls -A "$resolved" 2>/dev/null)" ]]; then
+    return 0
+  fi
+
+  if ! grep -qE '"prepare"[[:space:]]*:' "$dir/package.json"; then
+    echo "warning: lane uses core.hooksPath=${hooks_path} but its hooks dir is missing and" >&2
+    echo "         package.json has no 'prepare' script to regenerate it — git hooks (e.g." >&2
+    echo "         pre-commit linting) will NOT run in this lane. Wire them up by hand." >&2
+    return 0
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "warning: git hooks need regenerating on the host (core.hooksPath=${hooks_path})," >&2
+    echo "         but no host 'npm' was found. Run 'npm run prepare' in ${dir} yourself, or" >&2
+    echo "         git hooks will NOT run in this lane." >&2
+    return 0
+  fi
+
+  echo "==> npm run prepare (host — re-wires git hooks the container can't)"
+  ( cd "$dir" && npm run prepare ) || true
+
+  if [[ -d "$resolved" && -n "$(ls -A "$resolved" 2>/dev/null)" ]]; then
+    echo "    git hooks wired up at ${hooks_path}"
+  else
+    echo "warning: git hooks still not installed at ${hooks_path} after 'npm run prepare' —" >&2
+    echo "         pre-commit hooks will NOT run in this lane. Check the project's prepare" >&2
+    echo "         step and core.hooksPath, then re-run it on the host." >&2
+  fi
+}
+
 [[ -d "$lane_dir" ]] || { echo "error: no lane at $lane_dir — create it first." >&2; exit 1; }
 cd "$lane_dir"
 
@@ -106,4 +150,8 @@ ddev exec "$sake" dev/build flush=1
 if [[ "$restricts_hosts" -eq 1 ]]; then
   ddev exec "curl -s -o /dev/null -H 'Host: ${flush_host}' 'http://localhost/?flush=1'" || true
 fi
+
+# Repair git hooks if the reset (or a pre-fix lane) left them unwired.
+ensure_worktree_git_hooks "$lane_dir"
+
 echo "==> Lane '${lane}' reset onto ${base} and ready"
