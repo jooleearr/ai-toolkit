@@ -52,7 +52,7 @@ change the ticket implies rather than smuggling it in.>
 ## Slice checklist
 
 The vertical-slice sequence. Each slice is a small PR (a handful of files, a few hundred
-LOC) that leaves the mainline mergeable; flag any that needs a feature branch/flag. A task
+LOC) that leaves the mainline mergeable; flag any that needs a feature branch. A task
 that is a single tracer bullet is a one-item checklist — a correct outcome, not an under-filled one.
 
 Where a unit is one atomic change whose pieces can't each land alone, mark it **internal
