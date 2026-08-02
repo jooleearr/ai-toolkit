@@ -217,6 +217,26 @@ the canonical content drifts.
   if you ever install by hand, do the same: `ddev exec bash -c "PUPPETEER_SKIP_DOWNLOAD=true npm
   install"`. The skipped binary only backs docs-to-PDF paths, not the dev servers, and
   Playwright browsers live host-side anyway.
+- **Git hooks silently don't fire in a fresh lane** — hook managers like husky (≥9) and
+  lefthook wire commits up through `core.hooksPath`, pointing git at a *generated* hooks
+  directory (e.g. `.husky/_`). That directory is gitignored, so `git worktree add` never
+  copies it into a lane; `core.hooksPath` itself lives in the repo-local git config that
+  every worktree **shares**, so git looks for a hooks dir that isn't there and does
+  nothing. A missing hook is a **no-op, not an error** — commits sail through with no
+  linting or formatting, and the first you hear of it is CI rejecting a branch's worth of
+  commits. Regenerating the dir *inside the DDEV container* fails just as quietly: a
+  worktree's `.git` is a file pointing at an absolute host gitdir that isn't mounted in the
+  container, so the hook manager's git calls can't resolve the gitdir and it exits
+  silently. `create-lane.sh` (after `npm install`) and `reset-lane.sh` now detect a
+  `core.hooksPath` project and regenerate the hooks **on the host** via `npm run prepare` —
+  where the gitdir path resolves — then verify the dir exists and warn loudly if it still
+  doesn't. Manual escape hatch for a lane created before this, or when the scripts warn:
+  run the prepare step on the **host** (not `ddev exec`) from inside the lane:
+
+  ```bash
+  cd <repo>-wt-<lane> && npm run prepare   # recreates .husky/_ ; run on the host, not in the container
+  ```
+
 - **Fixed Vite host port needs no per-lane juggling** — even when a project pins Vite to a
   *fixed* host port via `web_extra_exposed_ports` (e.g. `5173`) and every lane shares the
   identical committed config, there is no port clash: ddev-router multiplexes the fixed host

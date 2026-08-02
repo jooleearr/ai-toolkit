@@ -90,6 +90,62 @@ else
 fi
 flush_host="${LANE_FLUSH_HOST:-${canonical}.ddev.site}"
 
+# Wire up git hooks for a freshly-created (or reset) lane. Hook managers like husky ≥9
+# and lefthook point git at a generated hooks directory via core.hooksPath (e.g.
+# .husky/_). That directory is gitignored, so `git worktree add` never copies it into a
+# lane; core.hooksPath itself lives in the repo-local git config that every worktree
+# shares, so git dutifully looks for a hooks dir that isn't there and does nothing — a
+# missing hook is a silent no-op, and commits sail through with no linting or formatting.
+# Regenerating it *inside the DDEV container* fails just as silently: a worktree's .git is
+# a file pointing at an absolute host gitdir that isn't mounted in the container, so the
+# hook manager's git calls can't resolve the gitdir and it exits quietly. So regenerate on
+# the HOST, where that path resolves, then verify the hooks dir actually exists — a
+# silently missing pre-commit hook is worse than a noisy one, because the first you hear of
+# it is CI rejecting a branch's worth of commits.
+ensure_worktree_git_hooks() {
+  local dir="$1"
+  [[ -f "$dir/package.json" ]] || return 0
+
+  local hooks_path
+  hooks_path="$(git -C "$dir" config --get core.hooksPath 2>/dev/null || true)"
+  [[ -n "$hooks_path" ]] || return 0   # project doesn't use a core.hooksPath hook manager
+
+  # Resolve a relative hooks path against the worktree root (git resolves core.hooksPath
+  # relative to the working tree at hook time, so each lane maps to its own copy).
+  local resolved="$hooks_path"
+  [[ "$resolved" = /* ]] || resolved="$dir/$hooks_path"
+
+  # Already wired up (a non-empty hooks dir) → nothing to do. Covers a reset onto a base
+  # whose hooks survived the clean, and re-runs on an existing lane.
+  if [[ -d "$resolved" && -n "$(ls -A "$resolved" 2>/dev/null)" ]]; then
+    return 0
+  fi
+
+  if ! grep -qE '"prepare"[[:space:]]*:' "$dir/package.json"; then
+    echo "warning: lane uses core.hooksPath=${hooks_path} but its hooks dir is missing and" >&2
+    echo "         package.json has no 'prepare' script to regenerate it — git hooks (e.g." >&2
+    echo "         pre-commit linting) will NOT run in this lane. Wire them up by hand." >&2
+    return 0
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "warning: git hooks need regenerating on the host (core.hooksPath=${hooks_path})," >&2
+    echo "         but no host 'npm' was found. Run 'npm run prepare' in ${dir} yourself, or" >&2
+    echo "         git hooks will NOT run in this lane." >&2
+    return 0
+  fi
+
+  echo "==> npm run prepare (host — wires up git hooks the container can't)"
+  ( cd "$dir" && npm run prepare ) || true
+
+  if [[ -d "$resolved" && -n "$(ls -A "$resolved" 2>/dev/null)" ]]; then
+    echo "    git hooks wired up at ${hooks_path}"
+  else
+    echo "warning: git hooks still not installed at ${hooks_path} after 'npm run prepare' —" >&2
+    echo "         pre-commit hooks will NOT run in this lane. Check the project's prepare" >&2
+    echo "         step and core.hooksPath, then re-run it on the host." >&2
+  fi
+}
+
 [[ -d "$lane_dir" ]] && { echo "error: $lane_dir already exists." >&2; exit 1; }
 
 echo "==> Creating lane '${lane}' at ${lane_dir} (base ${base}, project ${project}, mode ${mode})"
@@ -194,6 +250,9 @@ ddev composer install
 if [[ -f package.json ]]; then
   echo "==> ddev npm install (shared npm cache — network-cheap after first lane)"
   ddev exec bash -c "PUPPETEER_SKIP_DOWNLOAD=true npm install"
+  # Regenerate git hooks on the host — the in-container npm install above can't (see the
+  # function comment). Run after deps are present so the hook manager binary exists.
+  ensure_worktree_git_hooks "$lane_dir"
 fi
 if [[ -f "$db" ]]; then
   echo "==> ddev import-db --file=$db"
