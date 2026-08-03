@@ -54,8 +54,6 @@ Start by sizing the task against a single small PR — **a handful of files and 
 
 Where a slice genuinely can't merge partially working, note that it belongs behind a **feature branch**. Each slice on the doc's checklist is a working end-to-end path sized to a small PR.
 
-Some calls sit with the user, not the plan — **raise them as suggestions and let the user's constraints decide**. Where a slice would land more safely behind a **feature flag**, or the ticket boundary looks too wide (above), surface it upstream the same way rather than baking it into the plan; the current WIP, the state of releases, and the size of the request are the user's to weigh, and a suggestion shouldn't override constraints they already work under.
-
 **Completion criterion:** the work is sized — a one-slice checklist, an ordered multi-slice sequence, a single atomic change marked as internal slices, or a recommendation to re-draw a too-wide boundary — with each slice sized to a small PR and leaving the mainline mergeable (or flagged as needing a feature branch).
 
 ## 5. Write the hand-off doc
