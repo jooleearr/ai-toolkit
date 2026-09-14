@@ -47,9 +47,13 @@ ai-toolkit/
 ├── .claude-plugin/
 │   └── marketplace.json        # the catalog — lists every plugin below
 ├── plugins/
-│   └── core/                   # a plugin (skills that apply to any project)
+│   ├── core/                   # a plugin (skills that apply to any project)
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/<name>/SKILL.md
+│   │   └── README.md
+│   └── slice/                  # the slice loop — one ticket, plan to PRs
 │       ├── .claude-plugin/plugin.json
-│       ├── skills/<name>/SKILL.md
+│       ├── PROJECT-EXTENSIONS.md
 │       └── README.md
 ├── shared/
 │   └── settings.template.json  # default permissions (installed separately — see below)
@@ -61,6 +65,7 @@ ai-toolkit/
 | Plugin | Install | Contents |
 | :----- | :------ | :------- |
 | `core` | `core@ai-toolkit` | General skills, e.g. `ai-ready-repo`. See [plugins/core](plugins/core/README.md). |
+| `slice` | `slice@ai-toolkit` | The slice loop — one ticket, plan through implementation to verification, a slice at a time. See [plugins/slice](plugins/slice/README.md). |
 
 ## Adding resources
 

@@ -1,0 +1,11 @@
+{
+  "name": "slice",
+  "description": "Take one ticket from plan to reviewable PRs, one vertical slice at a time.",
+  "version": "0.1.0",
+  "author": {
+    "name": "jooleearr"
+  },
+  "homepage": "https://github.com/jooleearr/ai-toolkit",
+  "repository": "https://github.com/jooleearr/ai-toolkit",
+  "license": "MIT"
+}

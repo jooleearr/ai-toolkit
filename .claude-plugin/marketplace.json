@@ -12,6 +12,11 @@
       "name": "core",
       "source": "./plugins/core",
       "description": "Core reusable skills that apply to any project."
+    },
+    {
+      "name": "slice",
+      "source": "./plugins/slice",
+      "description": "Take one ticket from plan to reviewable PRs, one vertical slice at a time."
     }
   ]
 }
