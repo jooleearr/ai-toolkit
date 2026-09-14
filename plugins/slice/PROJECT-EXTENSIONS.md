@@ -20,11 +20,7 @@ In the project being worked on, **not** in this repo:
 ├── implement.md    # build commands, gates, conventions the code must meet
 ├── verify.md       # what proof this project accepts, and how PRs are raised
 ├── address.md      # where review feedback hides, and how it's replied to
-└── retro.md        # where improvement work gets filed
 ```
-
-Every file is optional and independent. A project that only ever needs to tell the
-implement stage how to rebuild its containers ships one file.
 
 ## How a stage uses its file
 
@@ -46,7 +42,7 @@ missing extension is a normal state, not a warning.
 
 ## What belongs in one
 
-Things that are true of this project and would otherwise have to be re-derived, guessed,
+Things that are true of a project and would otherwise have to be re-derived, guessed,
 or learned the hard way on every run:
 
 - **Commands** — how tests, type checks, linters and builds are actually invoked here,
