@@ -25,7 +25,6 @@ yet.
 | `implement` | `/slice:implement` | _Planned._ Builds exactly one slice and its tests, gets the project's gates green, commits. No self-review. |
 | `verify` | `/slice:verify` | _Planned._ Checks a built slice against the plan — acceptance criteria, scope, assumptions — cold, then raises the PR if it passes. |
 | `address` | `/slice:address` | _Planned._ Handles what comes back on a raised PR: review comments, a failed gate, a red check. Fixes in new commits, never a rewrite. |
-| `retro` | `/slice:retro` | _Planned._ Reads accumulated runs, finds what humans caught that the loop didn't, and files the improvements. |
 
 ## Per-project customisation
 
