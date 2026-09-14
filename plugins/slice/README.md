@@ -27,20 +27,6 @@ yet.
 | `address` | `/slice:address` | _Planned._ Handles what comes back on a raised PR: review comments, a failed gate, a red check. Fixes in new commits, never a rewrite. |
 | `retro` | `/slice:retro` | _Planned._ Reads accumulated runs, finds what humans caught that the loop didn't, and files the improvements. |
 
-## How it differs from `core`
-
-[`core`](../core/README.md) ships `plan` → `implement` → `pre-push-review`: a
-general-purpose pipeline for a developer working a change through, with a person present
-at each step.
-
-`slice` is the unattended version of the same idea. It adds the orchestration — the loop
-over slices, the branch and PR mechanics, the escalation rules, the round cap — and it
-assumes nobody is watching between the plan sign-off and the PRs landing. That assumption
-changes the skills rather than just wrapping them, which is why they're written separately
-rather than delegating to `core`.
-
-Use `core` when you're driving. Use `slice` when you want to hand over a ticket.
-
 ## Per-project customisation
 
 The skills are generic on purpose — they know the method, not your stack. Each stage
