@@ -21,14 +21,15 @@ there is no build, no dependencies, no runtime. Everything is Markdown + JSON co
   ("Use when ...").
 - **Permissions can't ship in a plugin** — a plugin `settings.json` only honours the
   `agent` and `subagentStatusLine` keys. Default permissions belong in
-  `shared/settings.template.json` and are applied by `install.sh`.
+  `shared/settings.template.json`; a human applies them by hand or with
+  `./install.sh --settings` (plain `./install.sh` only registers the marketplace).
 - **Versioning is automated — don't bump `version` by hand.** A GitHub Action
   (`.github/workflows/version-bump.yml`) owns each plugin's `version`: on every merge to
   `main` it bumps the changed plugin(s) from the merged commit's conventional-commit type
-  (`feat` → minor; `fix`/`docs`/`chore`/`refactor`/`perf` etc. → patch; a `!`/breaking
-  change → major), then commits the result back with `[skip ci]`. Leave `plugin.json`
-  `version` untouched in PRs — editing it on parallel branches is what caused the version
-  conflicts this replaces. New plugins ship with a starting `version` (e.g. `0.1.0`); the
+  (`feat` → minor; `fix`/`docs`/`chore`/`refactor`/`perf` etc. → patch; a `!` before the
+  colon, e.g. `feat!:`, → major), then commits the result back with `[skip ci]`. Leave
+  `plugin.json` `version` untouched in PRs — editing it on parallel branches causes version
+  conflicts. New plugins ship with a starting `version` (e.g. `0.1.0`); the
   Action takes it from there. (Without any version the git commit SHA is used, and every
   commit counts as an update.)
 
